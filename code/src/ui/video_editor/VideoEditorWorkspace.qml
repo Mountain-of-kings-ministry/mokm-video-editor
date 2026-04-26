@@ -3,7 +3,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.impl
 import QtQuick.Layouts
+import QtQuick.Dialogs
+import QtCore
 import Mokm.Timeline 1.0
+import Mokm.Database 1.0
 import untitled
 
 Item {
@@ -18,139 +21,255 @@ Item {
     // Pixels per frame for timeline scaling
     property double pixelsPerFrame: 2.0
 
+    FileDialog {
+        id: importDialog
+        title: "Import Media"
+        currentFolder: StandardPaths.writableLocation(StandardPaths.MoviesLocation)
+        fileMode: FileDialog.OpenFiles
+        onAccepted: {
+            for (var i = 0; i < selectedFiles.length; ++i) {
+                MediaBinModel.importMedia(selectedFiles[i])
+            }
+        }
+    }
+
     SplitView {
         anchors.fill: parent
         orientation: Qt.Vertical
 
-        // Top half: Monitors
+        // Top half: Media Bin + Monitors
         SplitView {
             SplitView.fillHeight: true
             orientation: Qt.Horizontal
 
-            // Source Monitor
+            // Integrated Media Bin
             Rectangle {
-                SplitView.fillWidth: true
+                SplitView.preferredWidth: 280
+                SplitView.minimumWidth: 200
                 color: Theme.found
                 
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: Theme.paddingSmall
-
-                    Text {
-                        text: "Source Monitor"
-                        color: Theme.textSecondary
-                        font: Theme.smallFont
-                    }
                     
-                    Rectangle {
+                    RowLayout {
+                        Text {
+                            text: "Bin"
+                            color: Theme.sovereign; font: Theme.smallFontBold
+                            Layout.fillWidth: true
+                        }
+                        ToolButton {
+                            icon.source: "../icons/outline/plus.svg"
+                            icon.height: 16; icon.width: 16
+                            onClicked: importDialog.open()
+                        }
+                        ToolButton {
+                            icon.source: "../icons/outline/chevron-left.svg"
+                            icon.height: 16; icon.width: 16
+                            visible: MediaBinModel.currentParentId !== ""
+                            onClicked: MediaBinModel.currentParentId = ""
+                        }
+                    }
+
+                    TextField {
+                        Layout.fillWidth: true
+                        placeholderText: "Search..."
+                        onTextChanged: MediaBinModel.searchText = text
+                        font: Theme.smallFont
+                        background: Rectangle { color: Theme.surface; radius: 4 }
+                    }
+
+                    ListView {
+                        id: miniBinList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: Theme.surface
-                        
-                        IconImage {
-                            color: Theme.textSecondary
-                            anchors.centerIn: parent
-                            source: "../icons/outline/player-play.svg"
-                            width: 64; height: 64
-                            opacity: 0.3
-                        }
-                    }
-                    // Transport controls
-                    RowLayout {
-                        Layout.alignment: Qt.AlignHCenter
-                        ToolButton {
-                            icon.source: "../icons/outline/player-skip-back.svg"
-                            icon.color: Theme.textPrimary
-                            onClicked: PlayheadController.goToStart()
-                        }
-                        ToolButton {
-                            icon.source: PlayheadController.isPlaying ? "../icons/outline/player-pause.svg" : "../icons/outline/player-play.svg"
-                            icon.color: Theme.textPrimary
-                            onClicked: PlayheadController.togglePlayPause()
-                        }
-                        ToolButton {
-                            icon.source: "../icons/outline/player-skip-forward.svg"
-                            icon.color: Theme.textPrimary
-                            onClicked: PlayheadController.goToEnd()
+                        clip: true
+                        model: MediaBinModel
+                        delegate: ItemDelegate {
+                            id: binDelegate
+                            width: miniBinList.width
+                            height: 40
+                            
+                            required property var model
+                            
+                            contentItem: RowLayout {
+                                IconImage {
+                                    source: binDelegate.model.isFolder ? "../icons/outline/folder.svg" : "../icons/outline/video.svg"
+                                    color: binDelegate.model.isFolder ? Theme.sovereign : Theme.textSecondary
+                                    Layout.preferredWidth: 16; Layout.preferredHeight: 16
+                                }
+                                Text {
+                                    text: binDelegate.model.filename
+                                    color: Theme.textPrimary; font: Theme.smallFont
+                                    elide: Text.ElideMiddle; Layout.fillWidth: true
+                                }
+                            }
+                            
+                            onDoubleClicked: {
+                                if (binDelegate.model.isFolder) MediaBinModel.currentParentId = binDelegate.model.id
+                            }
+                            
+                            // Enable Drag
+                            Drag.active: dragMouse.drag.active
+                            Drag.hotSpot: Qt.point(12, 12)
+                            Drag.mimeData: {
+                                "mediaId": binDelegate.model.id,
+                                "mediaName": binDelegate.model.filename,
+                                "mediaType": binDelegate.model.mediaType,
+                                "durationSeconds": binDelegate.model.durationSeconds
+                            }
+                            
+                            MouseArea {
+                                id: dragMouse
+                                anchors.fill: parent
+                                drag.target: binDelegate.model.isFolder ? null : dragIcon
+                                
+                                IconImage {
+                                    id: dragIcon
+                                    visible: dragMouse.drag.active
+                                    source: "../icons/outline/video.svg"
+                                    color: Theme.sovereign
+                                    width: 24; height: 24
+                                    
+                                    Drag.active: dragMouse.drag.active
+                                    Drag.hotSpot: Qt.point(12, 12)
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Program Monitor
-            Rectangle {
+            // Monitors Split
+            SplitView {
                 SplitView.fillWidth: true
-                color: Theme.found
-                
-                border.color: Theme.sovereign
-                border.width: 1
-                
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.paddingSmall
+                orientation: Qt.Horizontal
 
-                    RowLayout {
+                // Source Monitor
+                Rectangle {
+                    SplitView.fillWidth: true
+                    color: Theme.found
+                    
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: Theme.paddingSmall
+
                         Text {
-                            text: "Program Monitor"
-                            color: Theme.sovereign
+                            text: "Source Monitor"
+                            color: Theme.textSecondary
                             font: Theme.smallFont
-                            Layout.fillWidth: true
                         }
-                        // Proxy Toggle Indicator
+                        
                         Rectangle {
-                            width: 60
-                            height: 20
-                            radius: 10
-                            color: Theme.sovereign
-                            Text {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            color: Theme.surface
+                            
+                            IconImage {
+                                color: Theme.textSecondary
                                 anchors.centerIn: parent
-                                text: "PROXY"
-                                color: Theme.surface
-                                font: Theme.smallFontBold
+                                source: "../icons/outline/player-play.svg"
+                                width: 48; height: 48
+                                opacity: 0.3
+                            }
+                        }
+                        // Transport controls
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            ToolButton {
+                                icon.source: "../icons/outline/player-skip-back.svg"
+                                icon.color: Theme.textPrimary
+                                onClicked: PlayheadController.goToStart()
+                            }
+                            ToolButton {
+                                icon.source: PlayheadController.isPlaying ? "../icons/outline/player-pause.svg" : "../icons/outline/player-play.svg"
+                                icon.color: Theme.textPrimary
+                                onClicked: PlayheadController.togglePlayPause()
+                            }
+                            ToolButton {
+                                icon.source: "../icons/outline/player-skip-forward.svg"
+                                icon.color: Theme.textPrimary
+                                onClicked: PlayheadController.goToEnd()
                             }
                         }
                     }
+                }
+
+                // Program Monitor
+                Rectangle {
+                    SplitView.fillWidth: true
+                    color: Theme.found
                     
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        color: Theme.surface
-                        
-                        IconImage {
-                            color: Theme.textSecondary
-                            anchors.centerIn: parent
-                            source: "../icons/outline/video.svg"
-                            width: 64; height: 64
-                            opacity: 0.3
+                    border.color: Theme.sovereign
+                    border.width: 1
+                    
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: Theme.paddingSmall
+
+                        RowLayout {
+                            Text {
+                                text: "Program Monitor"
+                                color: Theme.sovereign
+                                font: Theme.smallFont
+                                Layout.fillWidth: true
+                            }
+                            // Proxy Toggle Indicator
+                            Rectangle {
+                                width: 60
+                                height: 20
+                                radius: 10
+                                color: Theme.sovereign
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "PROXY"
+                                    color: Theme.surface
+                                    font: Theme.smallFontBold
+                                }
+                            }
                         }
                         
-                        // Frame counter overlay
-                        Text {
-                            anchors.bottom: parent.bottom
-                            anchors.right: parent.right
-                            anchors.margins: 8
-                            text: "Frame: " + PlayheadController.currentFrame
-                            color: Theme.textSecondary
-                            font: Theme.smallFont
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            color: Theme.surface
+                            
+                            IconImage {
+                                color: Theme.textSecondary
+                                anchors.centerIn: parent
+                                source: "../icons/outline/video.svg"
+                                width: 48; height: 48
+                                opacity: 0.3
+                            }
+                            
+                            // Frame counter overlay
+                            Text {
+                                anchors.bottom: parent.bottom
+                                anchors.right: parent.right
+                                anchors.margins: 8
+                                text: "Frame: " + PlayheadController.currentFrame
+                                color: Theme.textSecondary
+                                font: Theme.smallFont
+                            }
                         }
-                    }
-                    // Transport controls
-                    RowLayout {
-                        Layout.alignment: Qt.AlignHCenter
-                        ToolButton {
-                            icon.source: "../icons/outline/player-skip-back.svg"
-                            icon.color: Theme.textPrimary
-                            onClicked: PlayheadController.stepBackward(10)
-                        }
-                        ToolButton {
-                            icon.source: PlayheadController.isPlaying ? "../icons/outline/player-pause.svg" : "../icons/outline/player-play.svg"
-                            icon.color: Theme.textPrimary
-                            onClicked: PlayheadController.togglePlayPause()
-                        }
-                        ToolButton {
-                            icon.source: "../icons/outline/player-skip-forward.svg"
-                            icon.color: Theme.textPrimary
-                            onClicked: PlayheadController.stepForward(10)
+                        // Transport controls
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            ToolButton {
+                                icon.source: "../icons/outline/player-skip-back.svg"
+                                icon.color: Theme.textPrimary
+                                onClicked: PlayheadController.stepBackward(10)
+                            }
+                            ToolButton {
+                                icon.source: PlayheadController.isPlaying ? "../icons/outline/player-pause.svg" : "../icons/outline/player-play.svg"
+                                icon.color: Theme.textPrimary
+                                onClicked: PlayheadController.togglePlayPause()
+                            }
+                            ToolButton {
+                                icon.source: "../icons/outline/player-skip-forward.svg"
+                                icon.color: Theme.textPrimary
+                                onClicked: PlayheadController.stepForward(10)
+                            }
                         }
                     }
                 }
@@ -186,13 +305,15 @@ Item {
                                 { icon: "magnet.svg", tool: "snap" }
                             ]
                             delegate: ToolButton {
-                                icon.source: "../icons/outline/" + modelData.icon
-                                icon.color: videoEditorWorkspace.activeTool === modelData.tool ? Theme.sovereign : Theme.textPrimary
+                                id: toolBtn
+                                required property var modelData
+                                icon.source: "../icons/outline/" + toolBtn.modelData.icon
+                                icon.color: videoEditorWorkspace.activeTool === toolBtn.modelData.tool ? Theme.sovereign : Theme.textPrimary
                                 background: Rectangle {
-                                    color: videoEditorWorkspace.activeTool === modelData.tool ? Theme.panel : "transparent"
+                                    color: videoEditorWorkspace.activeTool === toolBtn.modelData.tool ? Theme.panel : "transparent"
                                     radius: Theme.radius
                                 }
-                                onClicked: videoEditorWorkspace.activeTool = modelData.tool
+                                onClicked: videoEditorWorkspace.activeTool = toolBtn.modelData.tool
                             }
                         }
                     }
@@ -272,14 +393,47 @@ Item {
                                             DropArea {
                                                 anchors.fill: parent
                                                 onDropped: (drop) => {
-                                                    const mediaId = drop.getDataAsString("mediaId")
-                                                    const mediaName = drop.getDataAsString("mediaName")
-                                                    const durationSecs = parseFloat(drop.getDataAsString("durationSeconds") || "0")
-                                                    const fps = PlayheadController.fps || 24.0
-                                                    const durationFrames = durationSecs * fps
-                                                    const dropFrame = Math.max(0, Math.floor(drop.x / videoEditorWorkspace.pixelsPerFrame))
-                                                    
-                                                    Mokm.Core.UndoManager.addClip(trackRow.index, mediaId, mediaName, dropFrame, durationFrames)
+                                                    if (drop.hasUrls) {
+                                                        // File from OS
+                                                        for (var i = 0; i < drop.urls.length; ++i) {
+                                                            MediaBinModel.importMedia(drop.urls[i])
+                                                        }
+                                                    } else {
+                                                        // Internal Drag from Bin
+                                                        const mediaId = drop.getDataAsString("mediaId")
+                                                        const mediaName = drop.getDataAsString("mediaName")
+                                                        const durationSecs = parseFloat(drop.getDataAsString("durationSeconds") || "0")
+                                                        const fps = PlayheadController.fps || 24.0
+                                                        const durationFrames = durationSecs * fps
+                                                        const dropFrame = Math.max(0, Math.floor(drop.x / videoEditorWorkspace.pixelsPerFrame))
+                                                        
+                                                        Mokm.Core.UndoManager.addClip(trackRow.index, mediaId, mediaName, dropFrame, durationFrames)
+                                                    }
+                                                }
+                                            }
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                acceptedButtons: Qt.RightButton
+                                                onClicked: trackMenu.open()
+                                            }
+
+                                            Menu {
+                                                id: trackMenu
+                                                Action { 
+                                                    text: "Import from Bin"; 
+                                                    onTriggered: {
+                                                        // TODO: implementation
+                                                    }
+                                                }
+                                                Action { 
+                                                    text: "Import from Storage"; 
+                                                    onTriggered: importDialog.open() 
+                                                }
+                                                MenuSeparator {}
+                                                Action { 
+                                                    text: "Add Track Above"; 
+                                                    onTriggered: trackRow.model.isAudio ? TimelineModel.addAudioTrack() : TimelineModel.addVideoTrack() 
                                                 }
                                             }
 
@@ -306,7 +460,7 @@ Item {
                                                     Text {
                                                         anchors.centerIn: parent
                                                         text: clipRect.model.mediaName || "Clip"
-                                                        color: trackRow.model.isAudio ? Theme.textPrimary : Theme.surface
+                                                        color: trackRow.model.isAudio ? Theme.surface : Theme.textPrimary
                                                         font: Theme.smallFont
                                                         elide: Text.ElideRight
                                                         width: clipRect.width - 8

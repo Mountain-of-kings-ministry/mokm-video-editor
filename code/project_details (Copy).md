@@ -50,18 +50,6 @@ A lightweight yet professional-grade, fully open-source non-linear video editor 
 
 ## 2. Comprehensive Feature List
 
-### Level 1: Basic Editing and Fundamentals (Core Tier)
-
-- [ ] Multi-track non-linear timeline (independent audio & video tracks)
-- [ ] Frame-accurate cutting, trimming, and razor tool
-- [ ] Media Asset Management (Bins) with folder structure and metadata
-- [ ] Import/export of common video, audio, and image formats (via FFmpeg)
-- [ ] Standard transitions (fades, dissolves, wipes)
-- [ ] Basic text/title tool (stationary overlays)
-- [ ] Audio level monitoring (peak meters, gain controls)
-- [ ] Simple playback controls with smooth scrubbing
-- [ ] Project save/load with auto-save and crash recovery
-- [ ] Undo/Redo system (Qt Undo Framework)
 
 ### Level 2: Intermediate Editing and Effects (Creator Tier)
 
