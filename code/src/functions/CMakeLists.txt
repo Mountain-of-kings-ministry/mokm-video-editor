@@ -27,5 +27,5 @@ target_link_libraries(functions INTERFACE
     database
     ffmpeg_wrapper
     proxy
-    timeline
+    timeline_functions
 )

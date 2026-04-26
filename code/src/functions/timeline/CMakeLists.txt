@@ -1,2 +1,2 @@
-add_library(timeline INTERFACE)
-target_include_directories(timeline INTERFACE .)
+add_library(timeline_functions INTERFACE)
+target_include_directories(timeline_functions INTERFACE .)
