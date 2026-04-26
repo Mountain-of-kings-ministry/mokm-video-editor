@@ -65,7 +65,6 @@ bool MokmProjectManager::isDirty() const
 
 QStringList MokmProjectManager::recentProjects() const
 {
-    loadRecentProjects();
     QSettings settings("MOKM", "VideoEditor");
     return settings.value("recentProjects").toStringList();
 }
