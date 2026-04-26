@@ -80,7 +80,7 @@ jobs:
       - name: Install and Build
         run: |
           pnpm install --frozen-lockfile --ignore-workspace
-          pnpm run build
+          pnpm run build --ignore-workspace
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
