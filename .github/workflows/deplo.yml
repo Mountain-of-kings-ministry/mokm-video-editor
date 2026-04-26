@@ -77,11 +77,11 @@ jobs:
           cache-dependency-path: "./web/pnpm-lock.yaml"
 
       # 3. Install and Build
-      - name: Install and Build
-        run: pnpm install --frozen-lockfile --ignore-workspace
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
-      - name: Build web
-        run: pnpm --filter web run build
+      - name: Build
+        run: pnpm --filter web build
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
