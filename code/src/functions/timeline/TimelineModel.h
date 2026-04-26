@@ -4,43 +4,38 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QString>
+#include "TimelineClipModel.h"
 
-struct TimelineClip {
-    QString id;
-    QString mediaId; // Reference to MediaBinItem
-    int trackIndex;
-    double startFrame; // Start position on timeline
-    double durationFrames; // Length of clip on timeline
-    double sourceInFrame; // In-point in source media
-    double sourceOutFrame; // Out-point in source media
-};
-
-struct TimelineTrack {
+struct TimelineTrack
+{
     QString id;
     QString name;
     bool isAudio;
     bool isMuted;
     bool isSolo;
     int height;
-    QList<TimelineClip> clips;
+    TimelineClipModel *clipsModel = nullptr;
 };
 
-class TimelineModel : public QAbstractListModel {
+class TimelineModel : public QAbstractListModel
+{
     Q_OBJECT
 
 public:
-    enum TimelineRoles {
+    enum TimelineRoles
+    {
         IdRole = Qt::UserRole + 1,
         NameRole,
         IsAudioRole,
         IsMutedRole,
         IsSoloRole,
-        HeightRole
-        // Clips data requires a nested model or structured QVariantList, standard QVariantList for Phase A.
+        HeightRole,
+        ClipsRole
     };
 
     explicit TimelineModel(QObject *parent = nullptr);
-    static TimelineModel* instance();
+    ~TimelineModel();
+    static TimelineModel *instance();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -49,7 +44,11 @@ public:
 public slots:
     void addVideoTrack();
     void addAudioTrack();
-    void addClipToTrack(int trackIndex, const QString &mediaId, double startFrame);
+    void removeTrack(int trackIndex);
+    void addClipToTrack(int trackIndex, const QString &mediaId, const QString &mediaName, double startFrame, double durationFrames);
+    void moveClip(int fromTrackIndex, int toTrackIndex, const QString &clipId, double newStartFrame);
+    void trimClip(int trackIndex, const QString &clipId, double newSourceIn, double newSourceOut, double newDuration);
+    void splitClipAtFrame(int trackIndex, const QString &clipId, double atFrame);
     void clear();
 
 private:

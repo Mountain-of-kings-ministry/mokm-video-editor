@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 
-qt_standard_project_setup(REQUIRES 6.10)
+qt_standard_project_setup(REQUIRES 6.4)
 
 qt_add_executable(appmokmvideoeditor
     main.cpp
@@ -19,6 +19,7 @@ set_source_files_properties(src/ui/core/Theme.qml PROPERTIES QT_QML_SINGLETON_TY
 
 qt_add_qml_module(appmokmvideoeditor
     URI untitled
+    VERSION 1.0
     QML_FILES
         src/ui/Main.qml
         src/ui/core/Theme.qml

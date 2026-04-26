@@ -15,6 +15,16 @@ TimelineModel::TimelineModel(QObject *parent)
     addAudioTrack();
 }
 
+TimelineModel::~TimelineModel()
+{
+    for (auto &track : m_tracks) {
+        if (track.clipsModel) {
+            track.clipsModel->deleteLater();
+            track.clipsModel = nullptr;
+        }
+    }
+}
+
 TimelineModel* TimelineModel::instance() {
     return s_instance;
 }
@@ -37,6 +47,7 @@ QVariant TimelineModel::data(const QModelIndex &index, int role) const {
         case IsMutedRole: return track.isMuted;
         case IsSoloRole: return track.isSolo;
         case HeightRole: return track.height;
+        case ClipsRole: return QVariant::fromValue(track.clipsModel);
     }
     
     return QVariant();
@@ -50,6 +61,7 @@ QHash<int, QByteArray> TimelineModel::roleNames() const {
     roles[IsMutedRole] = "isMuted";
     roles[IsSoloRole] = "isSolo";
     roles[HeightRole] = "height";
+    roles[ClipsRole] = "clips";
     return roles;
 }
 
@@ -70,6 +82,7 @@ void TimelineModel::addVideoTrack() {
     t.isMuted = false;
     t.isSolo = false;
     t.height = 80;
+    t.clipsModel = new TimelineClipModel(this);
     
     beginInsertRows(QModelIndex(), m_tracks.count(), m_tracks.count());
     m_tracks.append(t);
@@ -88,33 +101,82 @@ void TimelineModel::addAudioTrack() {
     t.isMuted = false;
     t.isSolo = false;
     t.height = 80;
+    t.clipsModel = new TimelineClipModel(this);
     
     beginInsertRows(QModelIndex(), m_tracks.count(), m_tracks.count());
     m_tracks.append(t);
     endInsertRows();
 }
 
-void TimelineModel::addClipToTrack(int trackIndex, const QString &mediaId, double startFrame) {
+void TimelineModel::removeTrack(int trackIndex) {
+    if (trackIndex < 0 || trackIndex >= m_tracks.count()) return;
+    
+    beginRemoveRows(QModelIndex(), trackIndex, trackIndex);
+    if (m_tracks[trackIndex].clipsModel) {
+        m_tracks[trackIndex].clipsModel->deleteLater();
+    }
+    m_tracks.removeAt(trackIndex);
+    endRemoveRows();
+}
+
+void TimelineModel::addClipToTrack(int trackIndex, const QString &mediaId, const QString &mediaName, double startFrame, double durationFrames) {
     if (trackIndex < 0 || trackIndex >= m_tracks.count()) return;
     
     TimelineClip clip;
     clip.id = generateId();
     clip.mediaId = mediaId;
+    clip.mediaName = mediaName.isEmpty() ? mediaId : mediaName;
     clip.trackIndex = trackIndex;
     clip.startFrame = startFrame;
-    clip.durationFrames = 100; // Placeholder
+    clip.durationFrames = durationFrames;
     clip.sourceInFrame = 0;
-    clip.sourceOutFrame = 100; // Placeholder
+    clip.sourceOutFrame = durationFrames;
+    clip.color = "#4A9B8E"; // Default video clip color
     
-    m_tracks[trackIndex].clips.append(clip);
+    m_tracks[trackIndex].clipsModel->addClip(clip);
+}
+
+void TimelineModel::moveClip(int fromTrackIndex, int toTrackIndex, const QString &clipId, double newStartFrame) {
+    if (fromTrackIndex < 0 || fromTrackIndex >= m_tracks.count()) return;
+    if (toTrackIndex < 0 || toTrackIndex >= m_tracks.count()) return;
     
-    // We notify data change so UI can redraw
-    QModelIndex idx = index(trackIndex, 0);
-    emit dataChanged(idx, idx);
+    if (fromTrackIndex == toTrackIndex) {
+        m_tracks[fromTrackIndex].clipsModel->moveClip(clipId, newStartFrame, toTrackIndex);
+        return;
+    }
+    
+    // Find clip in source track
+    auto &fromClips = m_tracks[fromTrackIndex].clipsModel->clips();
+    for (int i = 0; i < fromClips.count(); ++i) {
+        if (fromClips[i].id == clipId) {
+            TimelineClip clip = fromClips[i];
+            clip.trackIndex = toTrackIndex;
+            clip.startFrame = newStartFrame;
+            
+            m_tracks[fromTrackIndex].clipsModel->removeClip(clipId);
+            m_tracks[toTrackIndex].clipsModel->addClip(clip);
+            return;
+        }
+    }
+}
+
+void TimelineModel::trimClip(int trackIndex, const QString &clipId, double newSourceIn, double newSourceOut, double newDuration) {
+    if (trackIndex < 0 || trackIndex >= m_tracks.count()) return;
+    m_tracks[trackIndex].clipsModel->trimClip(clipId, newSourceIn, newSourceOut, newDuration);
+}
+
+void TimelineModel::splitClipAtFrame(int trackIndex, const QString &clipId, double atFrame) {
+    if (trackIndex < 0 || trackIndex >= m_tracks.count()) return;
+    m_tracks[trackIndex].clipsModel->splitClip(clipId, atFrame);
 }
 
 void TimelineModel::clear() {
     beginResetModel();
+    for (auto &track : m_tracks) {
+        if (track.clipsModel) {
+            track.clipsModel->clear();
+        }
+    }
     m_tracks.clear();
     endResetModel();
 }

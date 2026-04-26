@@ -2,11 +2,14 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.impl
 import QtQuick.Layouts
-import "../core"
+import Mokm.Timeline 1.0
 
 Item {
     id: videoEditorWorkspace
     anchors.fill: parent
+
+    // Pixels per frame for timeline scaling
+    property double pixelsPerFrame: 2.0
 
     SplitView {
         anchors.fill: parent
@@ -38,9 +41,8 @@ Item {
                         color: Theme.surface
                         
                         IconImage {
-
-                        
-                            color: Theme.textSecondary; anchors.centerIn: parent
+                            color: Theme.textSecondary
+                            anchors.centerIn: parent
                             source: "../icons/outline/player-play.svg"
                             width: 64; height: 64
                             opacity: 0.3
@@ -49,12 +51,20 @@ Item {
                     // Transport controls
                     RowLayout {
                         Layout.alignment: Qt.AlignHCenter
-                        Repeater {
-                            model: ["player-skip-back.svg", "player-play.svg", "player-skip-forward.svg"]
-                            delegate: ToolButton {
-                                icon.source: "../icons/outline/" + modelData
-                                icon.color: Theme.textPrimary
-                            }
+                        ToolButton {
+                            icon.source: "../icons/outline/player-skip-back.svg"
+                            icon.color: Theme.textPrimary
+                            onClicked: PlayheadController.goToStart()
+                        }
+                        ToolButton {
+                            icon.source: PlayheadController.isPlaying ? "../icons/outline/player-pause.svg" : "../icons/outline/player-play.svg"
+                            icon.color: Theme.textPrimary
+                            onClicked: PlayheadController.togglePlayPause()
+                        }
+                        ToolButton {
+                            icon.source: "../icons/outline/player-skip-forward.svg"
+                            icon.color: Theme.textPrimary
+                            onClicked: PlayheadController.goToEnd()
                         }
                     }
                 }
@@ -100,23 +110,40 @@ Item {
                         color: Theme.surface
                         
                         IconImage {
-
-                        
-                            color: Theme.textSecondary; anchors.centerIn: parent
+                            color: Theme.textSecondary
+                            anchors.centerIn: parent
                             source: "../icons/outline/video.svg"
                             width: 64; height: 64
                             opacity: 0.3
+                        }
+                        
+                        // Frame counter overlay
+                        Text {
+                            anchors.bottom: parent.bottom
+                            anchors.right: parent.right
+                            anchors.margins: 8
+                            text: "Frame: " + PlayheadController.currentFrame
+                            color: Theme.textSecondary
+                            font: Theme.smallFont
                         }
                     }
                     // Transport controls
                     RowLayout {
                         Layout.alignment: Qt.AlignHCenter
-                        Repeater {
-                            model: ["player-skip-back.svg", "player-play.svg", "player-skip-forward.svg"]
-                            delegate: ToolButton {
-                                icon.source: "../icons/outline/" + modelData
-                                icon.color: Theme.textPrimary
-                            }
+                        ToolButton {
+                            icon.source: "../icons/outline/player-skip-back.svg"
+                            icon.color: Theme.textPrimary
+                            onClicked: PlayheadController.stepBackward(10)
+                        }
+                        ToolButton {
+                            icon.source: PlayheadController.isPlaying ? "../icons/outline/player-pause.svg" : "../icons/outline/player-play.svg"
+                            icon.color: Theme.textPrimary
+                            onClicked: PlayheadController.togglePlayPause()
+                        }
+                        ToolButton {
+                            icon.source: "../icons/outline/player-skip-forward.svg"
+                            icon.color: Theme.textPrimary
+                            onClicked: PlayheadController.stepForward(10)
                         }
                     }
                 }
@@ -176,14 +203,18 @@ Item {
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 100
-                                Text { text: "00:00:00:00"; color: Theme.textSecondary; font: Theme.smallFont }
+                                Text { 
+                                    text: formatTimecode(PlayheadController.currentFrame, PlayheadController.fps)
+                                    color: Theme.textSecondary
+                                    font: Theme.smallFont
+                                }
                                 Item { Layout.fillWidth: true }
                                 Text { text: "00:01:00:00"; color: Theme.textSecondary; font: Theme.smallFont }
                                 Item { Layout.fillWidth: true }
                             }
                         }
                         
-                        // Tracks
+                        // Tracks - data-driven from TimelineModel
                         ScrollView {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -192,39 +223,76 @@ Item {
                                 width: parent.width
                                 spacing: 2
                                 
-                                // Video Track 2
-                                RowLayout {
-                                    width: parent.width; height: 50
-                                    Rectangle { width: 100; height: parent.height; color: Theme.panel; Text { text:"V2"; anchors.centerIn:parent; color:Theme.textPrimary }}
-                                    Rectangle { Layout.fillWidth: true; height: parent.height; color: Theme.surface
-                                        Rectangle { x: 200; width: 150; height: parent.height-4; anchors.verticalCenter: parent.verticalCenter; radius: 4; color: Theme.glimmer; border.color: Theme.highlight; Text { text:"Title"; anchors.centerIn:parent; color:Theme.surface }}
-                                    }
-                                }
-                                // Video Track 1
-                                RowLayout {
-                                    width: parent.width; height: 50
-                                    Rectangle { width: 100; height: parent.height; color: Theme.panel; Text { text:"V1"; anchors.centerIn:parent; color:Theme.textPrimary }}
-                                    Rectangle { Layout.fillWidth: true; height: parent.height; color: Theme.surface
-                                        Rectangle { x: 50; width: 300; height: parent.height-4; anchors.verticalCenter: parent.verticalCenter; radius: 4; color: Theme.glimmer; Text { text:"Main Clip.mp4"; anchors.centerIn:parent; color:Theme.surface }}
-                                        Rectangle { x: 350; width: 250; height: parent.height-4; anchors.verticalCenter: parent.verticalCenter; radius: 4; color: Qt.darker(Theme.glimmer, 1.2); Text { text:"B-Roll 1.mp4"; anchors.centerIn:parent; color:Theme.surface }}
-                                    }
-                                }
-                                // Audio Track 1
-                                RowLayout {
-                                    width: parent.width; height: 50
-                                    Rectangle { width: 100; height: parent.height; color: Theme.panel; Text { text:"A1"; anchors.centerIn:parent; color:Theme.textPrimary }}
-                                    Rectangle { Layout.fillWidth: true; height: parent.height; color: Theme.surface
-                                        Rectangle { x: 50; width: 300; height: parent.height-4; anchors.verticalCenter: parent.verticalCenter; radius: 4; color: "#2E5B50"; Text { text:"Main Clip Audio"; anchors.centerIn:parent; color:Theme.textPrimary }}
-                                        Rectangle { x: 350; width: 250; height: parent.height-4; anchors.verticalCenter: parent.verticalCenter; radius: 4; color: "#2E5B50"; Text { text:"B-Roll 1 Audio"; anchors.centerIn:parent; color:Theme.textPrimary }}
+                                Repeater {
+                                    model: TimelineModel
+                                    
+                                    delegate: RowLayout {
+                                        width: parent.width
+                                        height: model.height
+                                        
+                                        // Track header
+                                        Rectangle {
+                                            Layout.preferredWidth: 100
+                                            Layout.fillHeight: true
+                                            color: Theme.panel
+                                            
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: model.name
+                                                color: Theme.textPrimary
+                                                font: Theme.smallFontBold
+                                            }
+                                        }
+                                        
+                                        // Track content area with clips
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+                                            color: Theme.surface
+                                            
+                                            // Nested Repeater for clips within this track
+                                            Repeater {
+                                                model: model.clips
+                                                
+                                                delegate: Rectangle {
+                                                    x: startFrame * pixelsPerFrame
+                                                    width: durationFrames * pixelsPerFrame
+                                                    height: parent.height - 4
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    radius: 4
+                                                    color: clipColor || (isAudio ? "#2E5B50" : Theme.glimmer)
+                                                    border.color: Theme.highlight
+                                                    border.width: 0
+                                                    
+                                                    // Clip label
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: mediaName || "Clip"
+                                                        color: isAudio ? Theme.textPrimary : Theme.surface
+                                                        font: Theme.smallFont
+                                                        elide: Text.ElideRight
+                                                        width: parent.width - 8
+                                                        horizontalAlignment: Text.AlignHCenter
+                                                    }
+                                                    
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        onClicked: {
+                                                            console.log("Selected clip:", clipId, "on track:", trackIndex)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                     
-                    // Playhead indicator
+                    // Playhead indicator - bound to PlayheadController
                     Rectangle {
-                        x: 180
+                        x: 100 + (PlayheadController.currentFrame * pixelsPerFrame)
                         y: 0
                         width: 2
                         height: parent.height
@@ -246,6 +314,22 @@ Item {
                 }
             }
         }
+    }
+
+    // Timecode formatter helper
+    function formatTimecode(frame, fps) {
+        if (fps <= 0) fps = 24.0
+        var totalSeconds = frame / fps
+        var hours = Math.floor(totalSeconds / 3600)
+        var minutes = Math.floor((totalSeconds % 3600) / 60)
+        var seconds = Math.floor(totalSeconds % 60)
+        var frames = Math.floor((totalSeconds - Math.floor(totalSeconds)) * fps)
+        
+        return pad(hours) + ":" + pad(minutes) + ":" + pad(seconds) + ":" + pad(frames)
+    }
+    
+    function pad(n) {
+        return n < 10 ? "0" + n : n
     }
 
     // Dummy Polygon for Playhead triangle
