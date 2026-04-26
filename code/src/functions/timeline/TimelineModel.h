@@ -45,7 +45,7 @@ public slots:
     void addVideoTrack();
     void addAudioTrack();
     void removeTrack(int trackIndex);
-    void addClipToTrack(int trackIndex, const QString &mediaId, const QString &mediaName, double startFrame, double durationFrames);
+    QString addClipToTrack(int trackIndex, const QString &mediaId, const QString &mediaName, double startFrame, double durationFrames);
     void moveClip(int fromTrackIndex, int toTrackIndex, const QString &clipId, double newStartFrame);
     void trimClip(int trackIndex, const QString &clipId, double newSourceIn, double newSourceOut, double newDuration);
     void splitClipAtFrame(int trackIndex, const QString &clipId, double atFrame);
