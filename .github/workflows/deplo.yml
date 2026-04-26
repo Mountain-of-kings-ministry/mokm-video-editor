@@ -21,20 +21,20 @@ jobs:
         with:
           node-version: "20"
           # If you use a lockfile, caching speeds up builds
-          cache: "pnpm"
+          cache: "npm"
           cache-dependency-path: "./web/package-lock.json"
 
       - name: Install and Build
         working-directory: ./web
         run: |
-          pnpm install
-          pnpm build
+          npm install
+          npm run build
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Change 'dist' to your actual build folder (e.g., 'out' or 'build')
-          path: ./web/dist
+          path: ./web/build/client
 
       - name: Deploy to GitHub Pages
         id: deployment
