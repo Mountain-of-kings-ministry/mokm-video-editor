@@ -1,8 +1,50 @@
+# name: Deploy to GitHub Pages
+
+# on:
+#   push:
+#     branches: ["main"] # Or your default branch name
+
+# permissions:
+#   contents: read
+#   pages: write
+#   id-token: write
+
+# jobs:
+#   build_and_deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: "20"
+#           # If you use a lockfile, caching speeds up builds
+#           cache: "npm"
+#           cache-dependency-path: "./web/package-lock.json"
+
+#       - name: Install and Build
+#         working-directory: ./web
+#         run: |
+#           npm install
+#           npm run build
+
+#       - name: Upload Artifact
+#         uses: actions/upload-pages-artifact@v3
+#         with:
+#           # Change 'dist' to your actual build folder (e.g., 'out' or 'build')
+#           path: ./web/build/client
+
+#       - name: Deploy to GitHub Pages
+#         id: deployment
+#         uses: actions/deploy-pages@v4
+
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Or your default branch name
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -12,28 +54,38 @@ permissions:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 1. Install pnpm first
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9 # or your specific version
+
+      # 2. Setup Node with pnpm caching
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          # If you use a lockfile, caching speeds up builds
-          cache: "npm"
-          cache-dependency-path: "./web/package-lock.json"
+          cache: "pnpm"
+          cache-dependency-path: "./web/pnpm-lock.yaml"
 
+      # 3. Install and Build
       - name: Install and Build
-        working-directory: ./web
         run: |
-          npm install
-          npm run build
+          pnpm install --frozen-lockfile
+          pnpm run build
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Change 'dist' to your actual build folder (e.g., 'out' or 'build')
+          # Points to the static client folder
           path: ./web/build/client
 
       - name: Deploy to GitHub Pages
