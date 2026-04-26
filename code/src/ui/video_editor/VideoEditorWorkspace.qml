@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.impl
@@ -8,6 +9,11 @@ import untitled
 Item {
     id: videoEditorWorkspace
     anchors.fill: parent
+
+    // Editor state
+    property string activeTool: "pointer"
+    property string selectedClipId: ""
+    property int selectedTrackIndex: -1
 
     // Pixels per frame for timeline scaling
     property double pixelsPerFrame: 2.0
@@ -173,14 +179,20 @@ Item {
                         anchors.topMargin: Theme.paddingMedium
                         
                         Repeater {
-                            model: ["pointer.svg", "cut.svg", "arrows-left-right.svg", "magnet.svg"]
+                            model: [
+                                { icon: "pointer.svg", tool: "pointer" },
+                                { icon: "cut.svg", tool: "razor" },
+                                { icon: "arrows-left-right.svg", tool: "slip" },
+                                { icon: "magnet.svg", tool: "snap" }
+                            ]
                             delegate: ToolButton {
-                                icon.source: "../icons/outline/" + modelData
-                                icon.color: index === 0 ? Theme.highlight : Theme.textPrimary
+                                icon.source: "../icons/outline/" + modelData.icon
+                                icon.color: videoEditorWorkspace.activeTool === modelData.tool ? Theme.sovereign : Theme.textPrimary
                                 background: Rectangle {
-                                    color: index === 0 ? Theme.panel : "transparent"
+                                    color: videoEditorWorkspace.activeTool === modelData.tool ? Theme.panel : "transparent"
                                     radius: Theme.radius
                                 }
+                                onClicked: videoEditorWorkspace.activeTool = modelData.tool
                             }
                         }
                     }
@@ -225,12 +237,17 @@ Item {
                                 spacing: 2
                                 
                                 Repeater {
+                                    id: trackRepeater
                                     model: TimelineModel
                                     
                                     delegate: RowLayout {
-                                        width: parent.width
-                                        height: model.height
+                                        id: trackRow
+                                        width: trackRepeater.width
+                                        height: trackRow.model.height
                                         
+                                        required property var model
+                                        required property int index
+
                                         // Track header
                                         Rectangle {
                                             Layout.preferredWidth: 100
@@ -239,7 +256,7 @@ Item {
                                             
                                             Text {
                                                 anchors.centerIn: parent
-                                                text: model.name
+                                                text: trackRow.model.name
                                                 color: Theme.textPrimary
                                                 font: Theme.smallFontBold
                                             }
@@ -247,39 +264,77 @@ Item {
                                         
                                         // Track content area with clips
                                         Rectangle {
+                                            id: trackContent
                                             Layout.fillWidth: true
                                             Layout.fillHeight: true
                                             color: Theme.surface
                                             
+                                            DropArea {
+                                                anchors.fill: parent
+                                                onDropped: (drop) => {
+                                                    const mediaId = drop.getDataAsString("mediaId")
+                                                    const mediaName = drop.getDataAsString("mediaName")
+                                                    const durationSecs = parseFloat(drop.getDataAsString("durationSeconds") || "0")
+                                                    const fps = PlayheadController.fps || 24.0
+                                                    const durationFrames = durationSecs * fps
+                                                    const dropFrame = Math.max(0, Math.floor(drop.x / videoEditorWorkspace.pixelsPerFrame))
+                                                    
+                                                    Mokm.Core.UndoManager.addClip(trackRow.index, mediaId, mediaName, dropFrame, durationFrames)
+                                                }
+                                            }
+
                                             // Nested Repeater for clips within this track
                                             Repeater {
-                                                model: model.clips
+                                                id: clipRepeater
+                                                model: trackRow.model.clips
                                                 
                                                 delegate: Rectangle {
-                                                    x: startFrame * pixelsPerFrame
-                                                    width: durationFrames * pixelsPerFrame
-                                                    height: parent.height - 4
+                                                    id: clipRect
+                                                    
+                                                    required property var model
+                                                    
+                                                    x: clipRect.model.startFrame * videoEditorWorkspace.pixelsPerFrame
+                                                    width: clipRect.model.durationFrames * videoEditorWorkspace.pixelsPerFrame
+                                                    height: trackContent.height - 4
                                                     anchors.verticalCenter: parent.verticalCenter
                                                     radius: 4
-                                                    color: clipColor || (isAudio ? "#2E5B50" : Theme.glimmer)
+                                                    color: clipRect.model.clipColor || (trackRow.model.isAudio ? "#2E5B50" : Theme.glimmer)
                                                     border.color: Theme.highlight
-                                                    border.width: 0
+                                                    border.width: (videoEditorWorkspace.selectedClipId === clipRect.model.clipId) ? 2 : 0
                                                     
                                                     // Clip label
                                                     Text {
                                                         anchors.centerIn: parent
-                                                        text: mediaName || "Clip"
-                                                        color: isAudio ? Theme.textPrimary : Theme.surface
+                                                        text: clipRect.model.mediaName || "Clip"
+                                                        color: trackRow.model.isAudio ? Theme.textPrimary : Theme.surface
                                                         font: Theme.smallFont
                                                         elide: Text.ElideRight
-                                                        width: parent.width - 8
+                                                        width: clipRect.width - 8
                                                         horizontalAlignment: Text.AlignHCenter
                                                     }
                                                     
                                                     MouseArea {
+                                                        id: clipMouseArea
                                                         anchors.fill: parent
-                                                        onClicked: {
-                                                            console.log("Selected clip:", clipId, "on track:", trackIndex)
+                                                        
+                                                        property double dragStartFrame: 0
+
+                                                        onPressed: (mouse) => {
+                                                            videoEditorWorkspace.selectedClipId = clipRect.model.clipId
+                                                            videoEditorWorkspace.selectedTrackIndex = trackRow.index
+                                                            dragStartFrame = clipRect.model.startFrame
+                                                        }
+
+                                                        onReleased: (mouse) => {
+                                                            if (videoEditorWorkspace.activeTool === "pointer") {
+                                                                const newFrame = Math.max(0, dragStartFrame + (mouse.x / videoEditorWorkspace.pixelsPerFrame))
+                                                                if (Math.abs(newFrame - dragStartFrame) > 0.1) {
+                                                                    Mokm.Core.UndoManager.moveClip(trackRow.index, trackRow.index, clipRect.model.clipId, newFrame)
+                                                                }
+                                                            } else if (videoEditorWorkspace.activeTool === "razor") {
+                                                                const splitFrame = clipRect.model.startFrame + (mouse.x / videoEditorWorkspace.pixelsPerFrame)
+                                                                Mokm.Core.UndoManager.splitClip(trackRow.index, clipRect.model.clipId, splitFrame)
+                                                            }
                                                         }
                                                     }
                                                 }

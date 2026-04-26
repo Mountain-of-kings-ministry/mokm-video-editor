@@ -61,6 +61,8 @@ QVariant MediaBinModel::data(const QModelIndex &index, int role) const
         return item.mediaType;
     case ThumbnailRole:
         return QVariant::fromValue(item.thumbnail);
+    case DurationSecondsRole:
+        return item.durationSeconds;
     }
 
     return QVariant();
@@ -82,6 +84,7 @@ QHash<int, QByteArray> MediaBinModel::roleNames() const
     roles[ProxyPathRole] = "proxyPath";
     roles[MediaTypeRole] = "mediaType";
     roles[ThumbnailRole] = "thumbnail";
+    roles[DurationSecondsRole] = "durationSeconds";
     return roles;
 }
 
@@ -116,6 +119,7 @@ void MediaBinModel::importMediaLocal(const QString &filePath)
     item.filePath = filePath;
     item.filename = extractFilename(filePath);
     item.duration = probe.duration;
+    item.durationSeconds = probe.durationSeconds;
     item.resolution = probe.resolution;
     item.frameRate = probe.frameRate;
     item.codec = probe.codec;
@@ -198,4 +202,16 @@ QVariantMap MediaBinModel::getMediaById(const QString &id) const
         }
     }
     return QVariantMap();
+}
+
+QImage MediaBinModel::getThumbnail(const QString &id) const
+{
+    for (const auto &item : m_items)
+    {
+        if (item.id == id)
+        {
+            return item.thumbnail;
+        }
+    }
+    return QImage();
 }

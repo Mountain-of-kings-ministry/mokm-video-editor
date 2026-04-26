@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Mokm.Core 1.0
 import untitled
 
 Rectangle {
@@ -25,11 +26,15 @@ Rectangle {
             
             ToolButton {
                 icon.source: "../icons/outline/arrow-back-up.svg"
-                // Undo
+                icon.color: UndoManager.canUndo ? Theme.sovereign : Theme.textDisabled
+                enabled: UndoManager.canUndo
+                onClicked: UndoManager.undo()
             }
             ToolButton {
                 icon.source: "../icons/outline/arrow-forward-up.svg"
-                // Redo
+                icon.color: UndoManager.canRedo ? Theme.sovereign : Theme.textDisabled
+                enabled: UndoManager.canRedo
+                onClicked: UndoManager.redo()
             }
         }
 
@@ -37,24 +42,13 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 2
-            
-            model: [
-                { action: "Open Project", isUndoable: false },
-                { action: "Add Clip 'V1'", isUndoable: true },
-                { action: "Split Clip", isUndoable: true },
-                { action: "Apply Cross Dissolve", isUndoable: true },
-                { action: "Change Offset (Color)", isUndoable: true }
-            ]
-            
+            model: UndoManager.history
             delegate: Rectangle {
+                id: historyItem
                 width: parent.width
                 height: 36
                 color: Theme.panel
                 radius: Theme.radius
-                
-                // Highlight the current state (mock logic: last item)
-                border.color: index === 4 ? Theme.glimmer : "transparent"
-                border.width: 1
                 
                 RowLayout {
                     anchors.fill: parent
@@ -62,11 +56,11 @@ Rectangle {
                     
                     Rectangle {
                         width: 8; height: 8; radius: 4
-                        color: Theme.surface
+                        color: Theme.sovereign
                     }
                     
                     Text {
-                        text: modelData.action
+                        text: modelData
                         color: Theme.textPrimary
                         font: Theme.defaultFont
                         Layout.fillWidth: true

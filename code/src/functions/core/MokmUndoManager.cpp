@@ -3,6 +3,7 @@
 #include "commands/RemoveClipCommand.h"
 #include "commands/MoveClipCommand.h"
 #include "commands/TrimClipCommand.h"
+#include "commands/SplitClipCommand.h"
 #include "../timeline/TimelineModel.h"
 
 static MokmUndoManager* s_instance = nullptr;
@@ -16,6 +17,7 @@ MokmUndoManager::MokmUndoManager(QObject *parent)
     connect(m_undoStack, &QUndoStack::canRedoChanged, this, &MokmUndoManager::canRedoChanged);
     connect(m_undoStack, &QUndoStack::undoTextChanged, this, &MokmUndoManager::canUndoChanged);
     connect(m_undoStack, &QUndoStack::redoTextChanged, this, &MokmUndoManager::canRedoChanged);
+    connect(m_undoStack, &QUndoStack::indexChanged, this, &MokmUndoManager::historyChanged);
 }
 
 MokmUndoManager* MokmUndoManager::instance() {
@@ -72,5 +74,20 @@ void MokmUndoManager::trimClip(int trackIndex, const QString &clipId, double new
 {
     auto *cmd = new TrimClipCommand(TimelineModel::instance(), trackIndex, clipId, newSourceIn, newSourceOut, newDuration);
     m_undoStack->push(cmd);
+}
+
+void MokmUndoManager::splitClip(int trackIndex, const QString &clipId, double atFrame)
+{
+    auto *cmd = new SplitClipCommand(trackIndex, clipId, atFrame);
+    m_undoStack->push(cmd);
+}
+
+QStringList MokmUndoManager::history() const
+{
+    QStringList list;
+    for (int i = 0; i < m_undoStack->count(); ++i) {
+        list.append(m_undoStack->text(i));
+    }
+    return list;
 }
 

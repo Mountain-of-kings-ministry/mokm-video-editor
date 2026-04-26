@@ -8,6 +8,8 @@
 #include "src/functions/timeline/TimelineModel.h"
 #include "src/functions/timeline/PlayheadController.h"
 
+#include "src/functions/database/MediaBinImageProvider.h"
+
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
@@ -19,7 +21,7 @@ int main(int argc, char *argv[])
     new TimelineModel(&app);
     new PlayheadController(&app);
 
-    // Expose Singletons to QML natively mapped into the global context or via RegisterSingleton
+    // Expose Singletons to QML
     qmlRegisterSingletonInstance("Mokm.Core", 1, 0, "ProjectManager", MokmProjectManager::instance());
     qmlRegisterSingletonInstance("Mokm.Core", 1, 0, "UndoManager", MokmUndoManager::instance());
     qmlRegisterSingletonInstance("Mokm.Database", 1, 0, "MediaBinModel", MediaBinModel::instance());
@@ -27,6 +29,8 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonInstance("Mokm.Timeline", 1, 0, "PlayheadController", PlayheadController::instance());
 
     QQmlApplicationEngine engine;
+    engine.addImageProvider(QLatin1String("media-bin"), new MediaBinImageProvider());
+
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,

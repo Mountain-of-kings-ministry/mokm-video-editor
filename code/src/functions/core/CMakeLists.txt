@@ -11,6 +11,8 @@ add_library(core STATIC
     commands/MoveClipCommand.h
     commands/TrimClipCommand.cpp
     commands/TrimClipCommand.h
+    commands/SplitClipCommand.cpp
+    commands/SplitClipCommand.h
 )
 set_target_properties(core PROPERTIES AUTOMOC ON)
 target_include_directories(core PUBLIC .)

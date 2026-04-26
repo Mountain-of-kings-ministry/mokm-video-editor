@@ -163,3 +163,15 @@ QString TimelineClipModel::generateId() const
 {
     return QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
+
+TimelineClip* TimelineClipModel::getClipById(const QString &clipId)
+{
+    for (int i = 0; i < m_clips.count(); ++i)
+    {
+        if (m_clips[i].id == clipId)
+        {
+            return &m_clips[i];
+        }
+    }
+    return nullptr;
+}

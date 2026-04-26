@@ -15,6 +15,7 @@ struct MediaBinItem
     QString filename;
     QString filePath;
     QString duration;   // "00:00:23:14"
+    double durationSeconds = 0;
     QString resolution; // "1920x1080"
     QString frameRate;  // "23.976 fps"
     QString codec;
@@ -45,7 +46,8 @@ public:
         HasProxyRole,
         ProxyPathRole,
         MediaTypeRole,
-        ThumbnailRole
+        ThumbnailRole,
+        DurationSecondsRole
     };
 
     explicit MediaBinModel(QObject *parent = nullptr);
@@ -63,6 +65,7 @@ public slots:
 
     Q_INVOKABLE QVariantList getAllMedia() const;
     Q_INVOKABLE QVariantMap getMediaById(const QString &id) const;
+    Q_INVOKABLE QImage getThumbnail(const QString &id) const;
 
 private:
     QList<MediaBinItem> m_items;

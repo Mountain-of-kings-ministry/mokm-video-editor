@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QUndoStack>
+#include <QStringList>
+#include "commands/SplitClipCommand.h"
 
 class TimelineModel;
 
@@ -12,6 +14,7 @@ class MokmUndoManager : public QObject {
     Q_PROPERTY(bool canRedo READ canRedo NOTIFY canRedoChanged)
     Q_PROPERTY(QString undoText READ undoText NOTIFY canUndoChanged)
     Q_PROPERTY(QString redoText READ redoText NOTIFY canRedoChanged)
+    Q_PROPERTY(QStringList history READ history NOTIFY historyChanged)
 
 public:
     explicit MokmUndoManager(QObject *parent = nullptr);
@@ -34,10 +37,14 @@ public slots:
     void removeClip(int trackIndex, const QString &clipId);
     void moveClip(int fromTrackIndex, int toTrackIndex, const QString &clipId, double newStartFrame);
     void trimClip(int trackIndex, const QString &clipId, double newSourceIn, double newSourceOut, double newDuration);
+    void splitClip(int trackIndex, const QString &clipId, double atFrame);
+
+    QStringList history() const;
 
 signals:
     void canUndoChanged();
     void canRedoChanged();
+    void historyChanged();
 
 private:
     QUndoStack *m_undoStack;

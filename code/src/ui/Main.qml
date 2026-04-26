@@ -7,6 +7,9 @@ import "preferences"
 import "proxy_manager"
 import "plugin_manager"
 import "keyboard_shortcuts"
+import QtQuick.Dialogs
+import Mokm.Core 1.0
+import Mokm.Database 1.0
 import untitled
 
 ApplicationWindow {
@@ -14,12 +17,70 @@ ApplicationWindow {
     width: 1280
     height: 720
     visible: true
-    title: qsTr("MOKM Video Editor")
+    title: ProjectManager.projectName + (ProjectManager.isDirty ? " *" : "") + " - MOKM Video Editor"
     color: Theme.surface
 
     Component.onCompleted: {
         console.log("Main UI Loaded")
-        console.log("Theme Surface Color: " + Theme.surface)
+        if (ProjectManager.checkForAutoSave()) {
+            recoveryDialog.open()
+        }
+    }
+
+    MessageDialog {
+        id: recoveryDialog
+        title: "Crash Recovery"
+        text: "An unsaved project was found. Would you like to recover it?"
+        buttons: MessageDialog.Yes | MessageDialog.No
+        onAccepted: ProjectManager.loadProject("")
+    }
+
+    FileDialog {
+        id: openProjectDialog
+        title: "Open Project"
+        nameFilters: ["MOKM Project Files (*.mokm)"]
+        onAccepted: ProjectManager.loadProject(selectedFile)
+    }
+
+    FileDialog {
+        id: saveAsProjectDialog
+        title: "Save Project As"
+        fileMode: FileDialog.SaveFile
+        nameFilters: ["MOKM Project Files (*.mokm)"]
+        onAccepted: ProjectManager.saveProjectAs(selectedFile)
+    }
+
+    menuBar: MenuBar {
+        Menu {
+            title: "File"
+            Action { text: "New Project"; shortcut: "Ctrl+N"; onTriggered: ProjectManager.createNewProject("Untitled") }
+            Action { text: "Open Project..."; shortcut: "Ctrl+O"; onTriggered: openProjectDialog.open() }
+            Menu {
+                title: "Recent Projects"
+                enabled: ProjectManager.recentProjects.length > 0
+                Repeater {
+                    model: ProjectManager.recentProjects
+                    delegate: MenuItem {
+                        text: modelData
+                        onTriggered: ProjectManager.loadProject(modelData)
+                    }
+                }
+            }
+            MenuSeparator {}
+            Action { text: "Save"; shortcut: "Ctrl+S"; onTriggered: ProjectManager.saveProject() }
+            Action { text: "Save As..."; shortcut: "Ctrl+Shift+S"; onTriggered: saveAsProjectDialog.open() }
+            MenuSeparator {}
+            Action { text: "Exit"; onTriggered: Qt.quit() }
+        }
+        Menu {
+            title: "Edit"
+            Action { text: "Undo"; shortcut: "Ctrl+Z"; enabled: UndoManager.canUndo; onTriggered: UndoManager.undo() }
+            Action { text: "Redo"; shortcut: "Ctrl+Y"; enabled: UndoManager.canRedo; onTriggered: UndoManager.redo() }
+        }
+        Menu {
+            title: "Help"
+            Action { text: "About MOKM Editor" }
+        }
     }
 
     // Instantiate Modals

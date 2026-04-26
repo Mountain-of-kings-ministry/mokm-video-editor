@@ -48,6 +48,7 @@ public:
     bool trimClip(const QString &clipId, double newSourceIn, double newSourceOut, double newDuration);
     bool splitClip(const QString &clipId, double atFrame);
     void clear();
+    TimelineClip* getClipById(const QString &clipId);
 
     QList<TimelineClip> &clips() { return m_clips; }
     const QList<TimelineClip> &clips() const { return m_clips; }
