@@ -78,9 +78,10 @@ jobs:
 
       # 3. Install and Build
       - name: Install and Build
-        run: |
-          pnpm install --frozen-lockfile --ignore-workspace
-          pnpm run build --ignore-workspace
+        run: pnpm install --frozen-lockfile --ignore-workspace
+
+      - name: Build web
+        run: pnpm --filter web run build
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
