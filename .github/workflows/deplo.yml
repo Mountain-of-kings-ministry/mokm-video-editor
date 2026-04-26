@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main"] # Or your default branch name
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          # If you use a lockfile, caching speeds up builds
+          cache: "pnpm"
+          cache-dependency-path: "./web/package-lock.json"
+
+      - name: Install and Build
+        working-directory: ./web
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Change 'dist' to your actual build folder (e.g., 'out' or 'build')
+          path: ./web/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -14,7 +14,6 @@ AddClipCommand::AddClipCommand(TimelineModel *timeline, int trackIndex, const QS
 void AddClipCommand::undo()
 {
     if (m_createdClipId.isEmpty()) return;
-    m_timeline->moveClip(m_trackIndex, m_trackIndex, m_createdClipId, m_startFrame);
     auto *clipsModel = m_timeline->data(m_timeline->index(m_trackIndex, 0), Qt::UserRole + 6).value<TimelineClipModel*>();
     if (clipsModel) clipsModel->removeClip(m_createdClipId);
     m_createdClipId.clear();
@@ -22,9 +21,6 @@ void AddClipCommand::undo()
 
 void AddClipCommand::redo()
 {
-    if (!m_firstRedo) {
-        m_timeline->addClipToTrack(m_trackIndex, m_mediaId, m_mediaName, m_startFrame, m_durationFrames);
-    }
-    m_firstRedo = false;
+    m_createdClipId = m_timeline->addClipToTrack(m_trackIndex, m_mediaId, m_mediaName, m_startFrame, m_durationFrames);
 }
 

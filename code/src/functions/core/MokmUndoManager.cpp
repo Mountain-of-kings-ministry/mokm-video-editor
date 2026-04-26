@@ -1,4 +1,9 @@
 #include "MokmUndoManager.h"
+#include "commands/AddClipCommand.h"
+#include "commands/RemoveClipCommand.h"
+#include "commands/MoveClipCommand.h"
+#include "commands/TrimClipCommand.h"
+#include "../timeline/TimelineModel.h"
 
 static MokmUndoManager* s_instance = nullptr;
 
@@ -44,3 +49,28 @@ void MokmUndoManager::redo() {
 void MokmUndoManager::clear() {
     m_undoStack->clear();
 }
+
+void MokmUndoManager::addClip(int trackIndex, const QString &mediaId, const QString &mediaName, double startFrame, double durationFrames)
+{
+    auto *cmd = new AddClipCommand(TimelineModel::instance(), trackIndex, mediaId, mediaName, startFrame, durationFrames);
+    m_undoStack->push(cmd);
+}
+
+void MokmUndoManager::removeClip(int trackIndex, const QString &clipId)
+{
+    auto *cmd = new RemoveClipCommand(TimelineModel::instance(), trackIndex, clipId);
+    m_undoStack->push(cmd);
+}
+
+void MokmUndoManager::moveClip(int fromTrackIndex, int toTrackIndex, const QString &clipId, double newStartFrame)
+{
+    auto *cmd = new MoveClipCommand(TimelineModel::instance(), fromTrackIndex, toTrackIndex, clipId, newStartFrame);
+    m_undoStack->push(cmd);
+}
+
+void MokmUndoManager::trimClip(int trackIndex, const QString &clipId, double newSourceIn, double newSourceOut, double newDuration)
+{
+    auto *cmd = new TrimClipCommand(TimelineModel::instance(), trackIndex, clipId, newSourceIn, newSourceOut, newDuration);
+    m_undoStack->push(cmd);
+}
+

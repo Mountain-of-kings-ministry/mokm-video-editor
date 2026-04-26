@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QUndoStack>
 
+class TimelineModel;
+
 class MokmUndoManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY canUndoChanged)
@@ -26,6 +28,12 @@ public slots:
     void undo();
     void redo();
     void clear();
+    
+    // Editing commands with undo support
+    void addClip(int trackIndex, const QString &mediaId, const QString &mediaName, double startFrame, double durationFrames);
+    void removeClip(int trackIndex, const QString &clipId);
+    void moveClip(int fromTrackIndex, int toTrackIndex, const QString &clipId, double newStartFrame);
+    void trimClip(int trackIndex, const QString &clipId, double newSourceIn, double newSourceOut, double newDuration);
 
 signals:
     void canUndoChanged();
