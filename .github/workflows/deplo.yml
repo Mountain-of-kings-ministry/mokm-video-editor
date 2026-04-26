@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
+          run: pwd
           cache-dependency-path: "./web/pnpm-lock.yaml"
 
       # Install from root - pnpm will find the /web folder via pnpm-workspace.yaml
