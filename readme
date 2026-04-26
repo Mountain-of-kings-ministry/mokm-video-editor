@@ -1,0 +1,362 @@
+this is a video editor that is stream lined to editing cinima grade video production power full and moduler system integration with other software
+
+#promt
+we need to make a deep plane, for a video editing software, we will be building from sratch using cpp and qt, with anyother opensource tools available.
+ 
+the aim is simple. make a video editing software that is power full, light weight, fast and compatable with even poor powerd pc/computers, and it should be comparable to industra standard softwares like davince resolve, previer pro, filmic pro.
+support plugins both video and audio plugins.
+ 
+the idea is from olive video editor, i like it it fast and good but the development have seezed and the code base is not really understandable for me, since am abit new to cpp. and have tried compiling the code base so it no use.
+ 
+everything will be built from scratch making it fully opensource, becuase i belive in giving the world opensource and power full tool.
+ 
+one of the key features of the video editing software will be proxy editing, so that it can prefetch low res version of video edit and compose when rendering with the high end video.
+any asset should be able to be proxed.
+ 
+i need you to list out from basic features to high end features line bu line, get from all of them so we will make a comprehensive plan to build the project.
+ 
+it will be similar to olive node based system, i like it.
+the ui must be clean and super responsive too.
+liost every opensource tools with each feature so i can be able to grap and impliment as we progres in building when it time to build
+
+research conclusion
+###########################
+
+nodebook llm note name : Interchange and Engineering for Modern Editorial Timelines
+
+Comprehensive Engineering and Architectural Design for a Professional Node-Based Open-Source Video Editor
+The evolution of digital non-linear editing (NLE) has reached a critical juncture where the demand for professional-grade tools often outstrips the accessibility of the hardware required to run them. While industry standards such as DaVinci Resolve, Adobe Premiere Pro, and Final Cut Pro offer immense power, they frequently impose a "hardware tax" that excludes creators operating on limited budgets or older computational environments.[1, 2, 3] The stagnation of promising open-source projects like Olive Video Editor, which pioneered the concept of a node-based NLE, has left a significant void in the creative ecosystem.[4, 5] This report provides an exhaustive architectural blueprint for a new, fully open-source video editing application built from the ground up using C++ and the Qt 6 framework. The primary objective is to deliver a software suite that is simultaneously powerful and lightweight, leveraging a sophisticated proxy-editing system and a high-performance node-based rendering engine to ensure compatibility with poor-powered computers without sacrificing professional capabilities.[3, 6, 7]
+Architectural Foundation: C++, Qt 6, and Modern Multimedia Backends
+The choice of C++ as the primary development language is non-negotiable for a project aiming at industry-standard performance. Unlike high-level languages that introduce garbage collection overhead, C++ allows for granular control over memory management, CPU instruction utilization, and direct hardware interaction, all of which are essential when processing multi-gigabyte video streams.[4, 8] By adhering to C++17 or C++20 standards, the project can utilize modern features like smart pointers, move semantics, and the Standard Template Library (STL) to create a codebase that is both safe and performant.[9, 10, 11]
+Qt 6 and the Scene Graph for High-Performance UI
+Qt 6 represents the pinnacle of cross-platform GUI development, offering a unified API for Windows, macOS, and Linux.[4, 12, 13] For a video editor, the user interface must be more than just aesthetically "clean"; it must be "super responsive." Traditional widget-based drawing often fails when tasked with the rapid repaints required for a 60 FPS video preview.[10, 14, 15] The proposed architecture utilizes QML (Qt Modeling Language) combined with C++ backends, leveraging the Qt Quick Scene Graph for hardware-accelerated rendering.[14, 16, 17]
+UI Requirement
+Implementation Strategy
+Justification
+Responsive Timeline
+Custom C++ Render Node in QML
+Minimizes overhead when drawing thousands of clip segments and audio waveforms.[14, 15, 18]
+Dockable Panels
+Qt Quick Controls 2 with Layouts
+Provides a customizable, modular interface similar to Shotcut and Premiere Pro.[6, 17, 19]
+Smooth Scrubbing
+Asynchronous Frame Pre-fetching
+Decouples the UI thread from the decoding pipeline to prevent interface lockups.[8, 10, 14]
+Node Graph
+Data-flow Model (QtNodes/NodeLink)
+Separates visual connections from underlying processing logic for complex compositing.[9, 16, 20]
+The performance of the UI on low-end machines is further optimized by utilizing the Qt Rendering Hardware Interface (RHI), which allows the application to target the most efficient graphics API on the host system (Vulkan on Linux, Metal on macOS, and Direct3D on Windows).[10, 21]
+Multimedia Processing: Direct Integration with FFmpeg (Libav)
+To achieve the "power" of industry-standard software, the application must natively support a vast array of codecs and containers. This is achieved by bypassing high-level wrappers and interacting directly with the FFmpeg libraries: libavcodec, libavformat, libavfilter, and libswscale.[22, 23] This low-level approach allows for custom buffer management, allowing the software to "stream" data from 20GB+ video files without saturating system RAM.[8, 24, 25]
+The backend must be designed as a multi-threaded producer-consumer system. While the UI thread handles user interactions, dedicated "Worker Threads" manage the decoding of video packets into raw frames.[8, 10, 17] This architecture is critical for "poor-powered" PCs, as it allows the software to utilize every available CPU core to maintain a steady frame rate during preview.
+The Proxy Editing Ecosystem: Architecture for Low-End Compatibility
+A defining feature of this NLE is its pervasive proxy editing system. Proxy editing involves creating a low-resolution, low-bitrate version of a high-resolution source clip for use during the editing process.[26, 27, 28, 29] This allows a machine that might struggle with 4K H.265 footage to edit fluidly using 720p ProRes Proxy or low-bitrate H.264 files.[26, 27, 28, 30]
+Automated Proxy Generation and Background Transcoding
+The proxy system should be "transparent" to the user. Upon importing an asset, the software analyzes the hardware's capabilities and the asset's bitrate. If the hardware is deemed insufficient for native editing, a background transcoding task is queued using FFmpeg.[27, 31, 32]
+The mathematics of proxy generation must balance speed and quality. For example, a 10-bit 4K source might be transcoded to a 1/4 resolution proxy using the following logic:
+Resolution 
+proxy
+​
+ = 
+ScaleFactor
+Resolution 
+source
+​
+ 
+​
+ 
+Bitrate 
+proxy
+​
+ ≈ 
+10
+Bitrate 
+source
+​
+ 
+​
+ 
+By utilizing I-frame-only codecs like ProRes 422 Proxy, the CPU is relieved of the burden of calculating inter-frame compression (GOP) during scrubbing, which is often the primary cause of lag in editors like Kdenlive or Shotcut on Windows.[19, 26, 28]
+High-Resolution Swap and Deterministic Rendering
+The core innovation of the proxy system is the "Dynamic Swap" mechanism. The software maintains a pointer to both the proxy and the original source in its internal asset database.[8, 20, 32] During the editing phase, the preview engine pulls data from the proxy file. However, during the final render or when the user toggles "High Quality Preview," the engine seamlessly switches the source pointer to the original high-resolution file.[26, 29]
+Proxy Parameter
+Professional Standard
+Performance Choice for Low-End PC
+Codec
+ProRes 422 / DNxHR [26, 28]
+H.264 (Hardware Accelerated) [28, 33]
+Resolution
+1080p [26, 33]
+540p or 360p [33, 34]
+Bit Depth
+10-bit [7, 30]
+8-bit [26, 28]
+Frame Rate
+Native [30]
+Native (Synchronized) [30, 35]
+This system ensures that even a 10-year-old laptop can handle a complex 4K edit, as the "heavy lifting" is offloaded to the proxy creation phase (which can run as a background process while the user organizes their project).[3, 36]
+Node-Based Processing Engine: The Visual Programming Paradigm
+The adoption of a node-based system—similar to the architecture of Olive 0.2—represents a significant departure from the traditional linear timeline of Premiere Pro or Kdenlive.[4, 5] In a node-based NLE, every video source, effect, and output is a node in a Directed Acyclic Graph (DAG).[5, 20, 37, 38] This architecture is inherently more flexible for advanced compositing, color grading, and complex visual effects.
+Data Flow and Lazy Evaluation
+The proposed node engine operates on a "pull" rather than "push" basis. The output node requests a frame at a specific timestamp. This request propagates backward through the graph. Each node only performs its calculation (e.g., a color adjustment or a blur) when requested, and the results are cached to prevent redundant processing.[21, 37, 38, 39]
+For low-end hardware, this "lazy evaluation" is crucial. If the user is only viewing a small portion of the screen, the nodes can be instructed to process only that specific "Region of Interest" (ROI), drastically reducing the number of pixels being calculated per frame.[22, 25, 37, 40]
+GLSL Shader Integration and GPU Compositing
+To maintain the software's "lightweight" and "fast" profile, the node engine should leverage the GPU for pixel-level operations. Each visual effect node is essentially a wrapper for a GLSL (OpenGL Shading Language) fragment shader.[8, 21, 41, 42] When the graph is executed, the engine can dynamically combine multiple shader operations into a single GPU pass, minimizing the costly transfer of data between the GPU and CPU (VRAM to RAM).[10, 21]
+Node Type
+Core Functionality
+Open Source Implementation
+Source Node
+Decoding and Frame Caching
+FFmpeg (libavformat/libavcodec) [22, 23]
+Transform Node
+Scaling, Rotation, Cropping
+GLSL Shaders / libswscale [21, 43, 44]
+Color Node
+Grading, LUTs, OCIO
+OpenColorIO (OCIO) [45, 46, 47]
+Filter Node
+Blur, Sharpen, Noise Reduction
+Frei0r Plugins / OpenCV [48, 49, 50]
+Compositing Node
+Alpha Blending, Masking
+GLSL Blending Modes [21, 41, 51]
+Comprehensive Feature Roadmap: Basic to High-End
+A professional NLE must provide a systematic progression of tools that cater to both beginners and high-level professionals. The following roadmap outlines these features line-by-line, integrated with the appropriate open-source tools for implementation.
+Level 1: Basic Editing and Fundamentals (The Core Tier)
+These features represent the essential foundation required for any editing project, focusing on a robust and reliable user experience.[51, 52, 53]
+Multi-Track Non-Linear Timeline: A responsive UI component managing audio and video tracks independently.
+Implementation Tool: Qt Quick with a custom C++ TimelineModel.[10, 18, 54]
+Frame-Accurate Cutting and Trimming: The "Razor" tool and basic clip edge manipulation.
+Implementation Tool: FFmpeg's av_seek_frame with frame-accurate indexing.[24, 55]
+Media Asset Management (Bins): A structured library for organizing files, folders, and metadata.
+Implementation Tool: Qt Model/View with SQLite for local asset persistence.[10, 32, 52]
+Standard Transitions: Basic fades, dissolves, and wipes.
+Implementation Tool: GLSL shaders for real-time alpha blending.[3, 32, 55, 56]
+Audio Level Monitoring: Real-time peak meters and gain controls.
+Implementation Tool: Qt Multimedia or PortAudio for audio buffer analysis.[3, 48, 55]
+Basic Text/Title Tool: Creating stationary text overlays.
+Implementation Tool: Qt Quick Text elements or SVG templates via Cairo.[44, 48, 51, 55]
+Level 2: Intermediate Editing and Effects (The Creator Tier)
+Intermediate features enhance the visual and auditory quality of the production, moving beyond simple cuts.[52, 53]
+Keyframe Animation: Interpolating properties like scale, position, and opacity over time.
+Implementation Tool: Qt Timeline module or a custom Bezier interpolation engine.[3, 6, 51, 54, 55]
+Primary Color Correction: Basic Exposure, Contrast, and White Balance adjustments.
+Implementation Tool: OpenColorIO (OCIO) with integrated GLSL shaders.[45, 46, 47]
+Advanced Audio Editing: Basic noise reduction, equalization, and multi-channel mixing.
+Implementation Tool: FFmpeg libavfilter (afade, anlmdn, aequalizer).[3, 22, 23]
+Speed Ramping and Time Remapping: Slow motion and fast motion with optical flow potential.
+Implementation Tool: libavfilter (setpts) and opentime from OpenTimelineIO.[23, 55, 57]
+Multi-Camera Sync: Basic synchronization of clips via audio waveforms or timecode.
+Implementation Tool: FFmpeg audio correlation algorithms.[1, 2, 3, 52]
+Custom LUT Support: Applying industry-standard.cube or.3dl tables.
+Implementation Tool: OpenColorIO (OCIO).[3, 45, 46, 47]
+Level 3: Professional Post-Production (The High-End Tier)
+These features bridge the gap between open-source editors and industry titans like DaVinci Resolve.[1, 2, 58]
+Advanced Compositing (Node Engine): Complex masking, rotoscoping, and layer-based compositing within a node graph.
+Implementation Tool: QtNodes or NodeLink with custom OpenFX (OFX) hosting.[9, 20, 37, 59]
+Motion Tracking: Planar and point tracking for pinning elements to moving video.
+Implementation Tool: OpenCV (Open Source Computer Vision Library).[32, 48, 50, 60]
+High Dynamic Range (HDR) Support: Mastering in 10-bit or 12-bit color spaces.
+Implementation Tool: OpenColorIO and hardware-accelerated 10-bit monitors.[2, 7, 47, 61]
+Audio Plugin Hosting (VST3/LV2): Support for professional-grade audio processors.
+Implementation Tool: Steinberg VST3 SDK or LV2 Plugin Standard.[62, 63, 64, 65, 66]
+Vector Scopes and Waveform Monitors: Real-time technical monitoring of color and luma.
+Implementation Tool: QCustomPlot or custom OpenGL-based scope widgets.[3, 67]
+Interoperability (OpenTimelineIO): Exporting/Importing project files for Premiere, Resolve, and Final Cut.
+Implementation Tool: OpenTimelineIO (OTIO).[57, 68]
+Plugin Architecture: Expanding Functionality through Standards
+To achieve the "industry standard" requirement, the software must be extensible. A modern NLE relies on a vibrant ecosystem of third-party plugins for specialized effects and audio processing.[3, 52]
+Video Plugins: OpenFX (OFX)
+OpenFX is the reference standard for visual effects (VFX) plugins in the film and television industry. It is supported by Nuke, DaVinci Resolve, and Catalyst.[37, 59] By implementing an OFX host, the application gains immediate access to hundreds of professional plugins.[59]
+Implementation: The host must provide "Suites" (sets of C-function pointers) to the plugin, allowing it to request frames, parameters, and UI handles.[37, 69]
+Advantage: Since OFX is an open standard, developers can write custom C++ nodes that are interoperable across multiple editors.[59, 70]
+Audio Plugins: VST3, LV2, and CLAP
+Audio is often the deciding factor in professional video quality.[3, 44] The software must support a range of audio plugin formats to allow for professional mixing and mastering.
+Format
+Characteristics
+Recommendation
+VST3
+Industry standard, dual-licensed (GPLv3/Proprietary).
+High priority for professional compatibility.[62, 64, 65, 71]
+LV2
+Open-source, extensible, primarily Linux-focused but cross-platform.
+Excellent for the "open-source for the world" mission.[63, 72, 73, 74]
+CLAP
+New, MIT-licensed, built for modern multi-core CPUs.
+Highly recommended for a high-performance "lightweight" editor.[72, 73]
+Frei0r
+Minimalist video effect API.
+Useful for lightweight, community-built filters.[49, 50, 75, 76]
+Engineering for Low-Power Hardware: Optimization Strategies
+Building a "fast" and "lightweight" software suite for "poor-powered computers" requires specific engineering choices that go beyond basic feature implementation.
+Efficient Threading and Asynchronous Tasking
+The application must never block the main UI thread. Any operation that takes more than 16ms (the threshold for 60 FPS) must be offloaded to a worker thread.[10, 14] Qt's QThreadPool and QtConcurrent provide high-level abstractions for managing these tasks without the overhead of manually managing low-level threads.[10, 17]
+For low-end machines, the software should prioritize tasks. For instance, the frame currently being displayed by the playhead is a high-priority task, while the generation of background proxies is a low-priority task that should only utilize idle CPU cycles.[10, 14]
+Zero-Copy Rendering and Memory Mapping
+One of the biggest bottlenecks in video processing is the transfer of data between the CPU and the GPU. Modern NLEs utilize "zero-copy" pipelines where the decoded frame remains in GPU memory for as long as possible.[10, 21]
+Hardware Decoders: By utilizing FFmpeg's hardware acceleration (NVENC, QuickSync, VAAPI), the decoding process occurs directly on the GPU.[23, 27, 35]
+Memory-Mapped Files: For timeline scrubbing, the software can use memory-mapped files (MMF) to allow the operating system's kernel to manage the caching of video data, rather than manually allocating large buffers in the application's heap.[8, 48]
+Strategic Use of Assembly and SIMD
+For critical processing loops—such as audio mixing or alpha blending on machines without a modern GPU—the software should utilize SIMD (Single Instruction, Multiple Data) instructions like SSE, AVX, or NEON.[22, 25, 48] This allows the CPU to process multiple pixels or audio samples in a single clock cycle, providing a significant speed boost on older processors.[25, 48]
+Open-Source Tool Mapping: The Project Toolbox
+To build this project efficiently, the following open-source tools and libraries should be integrated into the architecture. This mapping ensures that the developer can "grab and implement" as the project progresses.
+Feature Category
+Core Open Source Library/Tool
+Specific Role
+Core Framework
+Qt 6.5+ (C++ & QML) [11, 17]
+GUI, Windowing, Signal/Slot system, Networking.
+Multimedia Backend
+FFmpeg (libav libraries) [22, 23, 24]
+Decoding, Encoding, Transcoding, Filtering.
+Build System
+CMake [11, 39, 77]
+Cross-platform compilation, Dependency management.
+Node Graph Logic
+QtNodes / NodeLink [9, 16, 20]
+Visual representation and data flow management.
+Color Science
+OpenColorIO (OCIO) [45, 46, 47]
+Color grading, LUTs, ACES color management.
+Timeline Logic
+OpenTimelineIO (OTIO) [57, 68]
+Project interchange, timing calculations.
+Computer Vision
+OpenCV [48, 50]
+Motion tracking, face detection, background removal.
+Video Plugin Host
+OpenFX Support Library [70, 78]
+Integration of industry-standard visual effect plugins.
+Audio Plugin Host
+JUCE / VST3 SDK [48, 65]
+Hosting audio effects and VST/LV2 instruments.
+Video Filter API
+Frei0r [49, 50, 75]
+Lightweight, portable video filter standard.
+Package Manager
+Vcpkg or Conan [39, 78, 79]
+managing complex C++ dependencies like FFmpeg.
+Addressing the "Olive Problem": Code Understandability and Build Issues
+The user's experience with the Olive Video Editor codebase highlights a common challenge in large-scale C++ projects: technical debt and complex dependency chains.[4, 74, 79, 80] To avoid these pitfalls, this project must prioritize a "clean" and "modern" architectural style.
+Strict Modularization: The project should be divided into independent libraries (e.g., libeditor-core, libeditor-ui, libeditor-nodes). This makes the codebase easier to navigate and allows for unit testing of specific components without building the entire application.[9, 20, 39]
+Modern CMake Practices: Using CMake's target-based approach ensures that dependencies are handled correctly across different platforms, avoiding the "compiling failure" issues often found in older projects.[11, 39, 78]
+Documentation and Standards: Following a consistent coding style (e.g., Google or LLVM style) and utilizing tools like Doxygen for API documentation will ensure the project remains accessible to new contributors.[13, 49, 50]
+Continuous Integration (CI): Implementing automated builds for Windows, Linux, and macOS via GitHub Actions or GitLab CI will catch platform-specific issues early, ensuring the software remains cross-platform as it grows.[57, 80]
+Synthesis: Defining the "Industry Standard" Open-Source NLE
+To truly rival DaVinci Resolve or Premiere Pro, the application must offer more than just a timeline and nodes. It must offer a "Pro Workflow."
+The first pillar of this workflow is Frame Accuracy. In a professional environment, an edit must be precise down to the millisecond. This requires a deep understanding of video timing (PTS and DTS) and the implementation of a deterministic rendering engine that produces identical results on every machine.[8, 24, 55]
+The second pillar is Stability. Professional editors spend hours—sometimes days—on a single sequence. The software must include robust "Auto-Save" mechanisms and a system that can recover a project even after a crash.[3, 19] By utilizing Qt's Undo Framework, every action in the node graph or timeline can be reversed, allowing for fearless experimentation.[16, 20, 39]
+The third pillar is Workflow Continuity. Through the use of OpenTimelineIO, a creator can start an edit on their low-power laptop using proxies and later move the project to a high-end workstation for final color grading in DaVinci Resolve or VFX work in Nuke.[57, 68] This "interoperability" is what defines a modern professional tool.[57, 59, 74]
+Implementation Strategy and Engineering Timeline
+Building an application of this magnitude is a multi-year endeavor. The following phased approach is recommended to maintain momentum and ensure stability.
+Phase 1: The Core Multimedia Engine (Months 1-4)
+Focusing on the "Deep Plane" of video processing.
+Establish the C++/CMake build environment.[11, 77]
+Implement the FFmpeg-based decoding pipeline with support for basic formats.[23, 24]
+Develop a basic Qt Quick UI for media playback and frame-accurate seeking.[17, 40]
+Phase 2: The Proxy and Asset System (Months 5-8)
+Addressing the "Low-End Compatibility" requirement.
+Implement the background proxy transcoding engine using FFmpeg.[27, 31]
+Develop the asset management database (SQLite/JSON) for tracking source and proxy links.[20, 32, 52]
+Implement the UI for importing, organizing, and toggling proxies.[26, 29, 81]
+Phase 3: The Timeline and Basic NLE Tools (Months 9-12)
+Establishing the primary editing interface.
+Build the multi-track timeline using the Qt Model/View architecture.[10, 18, 54]
+Implement the basic editing tools (Select, Blade, Trim).[3, 51, 53]
+Develop the first iteration of the rendering engine for combining tracks.[8, 55]
+Phase 4: The Node-Based Compositing Engine (Months 13-18)
+The "Olive-inspired" architectural shift.
+Integrate a node-graph library (QtNodes/NodeLink) for visual effect management.[9, 16, 20]
+Develop the GLSL shader framework for real-time effects processing.[21, 41, 42]
+Implement the primary compositing nodes: Transform, Color Correct, and Alpha Blend.[21, 41, 51]
+Phase 5: Plugins and Professional Refinement (Months 19-24)
+Bridging the gap to industry standards.
+Implement the OpenFX (OFX) host for video effects.[37, 78]
+Implement the VST3/LV2 host for audio processing.[65, 66]
+Integrate OpenColorIO (OCIO) and OpenTimelineIO (OTIO) for professional workflow support.[45, 47, 57]
+Conclusions and Technical Recommendations
+The creation of a lightweight, powerful, and node-based video editor represents the next frontier in open-source creative tools. By utilizing C++ and Qt 6, the project ensures maximum performance across all major operating systems.[4, 12, 13] The pervasive use of proxy editing is not merely a "feature" but a core architectural philosophy that democratizes high-resolution video production by enabling it on modest hardware.[26, 27, 28, 33]
+The node-based approach—supported by GLSL shader integration—provides the scalability required for modern visual storytelling.[5, 21, 41] Furthermore, by adhering to industry standards like OpenFX, OpenColorIO, and VST3, the software ensures it can coexist within professional pipelines.[37, 45, 57, 59, 65]
+For the developer, the path forward involves a commitment to clean code, modular design, and a deep understanding of the multimedia ecosystem.[8, 24, 74] With a systematic implementation of the features outlined in this roadmap and a strategic use of the open-source tools provided, this new NLE has the potential to become a cornerstone of the global creative community, fulfilling the promise of a powerful and free tool for every creator, regardless of their hardware.[4, 6, 55, 59]
+--------------------------------------------------------------------------------
+The Best Professional Video Editing Software in 2025 - Dani Voice Overs, https://danivoiceovers.com/en/best-professional-video-editing-software/
+Top Professional Video Editing Software for Videographers in 2025 - AlphaScape Studios, https://www.alphascapestudios.com/top-professional-video-editing-software-for-videographers-in-2025
+Top Features to Look for in Your Next Video Editing Program, https://www.rochestervideopros.com/top-features-to-look-for-in-your-next-video-editing-program/
+The State of Open Source Video Editors 2022 : r/opensource - Reddit, https://www.reddit.com/r/opensource/comments/xj8xfh/the_state_of_open_source_video_editors_2022/
+I've used Kdenlive, Shotcut, Blender and Olive [1]. They all have strenghts and ... - Hacker News, https://news.ycombinator.com/item?id=39675531
+Top 10 Open Source Video Editors We've Tested in 2026, https://www.movavi.com/learning-portal/open-source-video-editor.html
+10 Must-have Equipment to Improve Your Video Editing - Bounce Color®, https://www.bouncecolor.com/blogs/news/10-must-have-video-editing
+Making video editor in cpp : r/GraphicsProgramming - Reddit, https://www.reddit.com/r/GraphicsProgramming/comments/1qz9gtq/making_video_editor_in_cpp/
+GitHub - roniasoft/NodeLink: Qt/QML NodeLink. Dataflow programming library, https://github.com/Roniasoft/NodeLink
+7 Proven Methods to Boost Qt Application Performance - Software Logic, https://softwarelogic.co/en/blog/7-proven-methods-to-boost-qt-application-performance
+How to Build a Qt Application Using Visual Studio Code | by Madhawa Polkotuwa - Medium, https://madhawapolkotuwa.medium.com/how-to-build-a-qt-application-using-visual-studio-code-0ba1781c6c3d
+Kdenlive - Free and Open Source Video Editor, https://kdenlive.org/
+Qt for Beginners - Qt Wiki, https://wiki.qt.io/Qt_for_Beginners
+Performance considerations and suggestions | Qt Quick | Qt 6.11.0, https://doc.qt.io/qt-6/qtquick-performance.html
+Qt Widgets in 10 years? : r/QtFramework - Reddit, https://www.reddit.com/r/QtFramework/comments/1qr0s6d/qt_widgets_in_10_years/
+NodeLink | Professional Qt/QML Node Editor, https://node-link.net/
+Free Coding Courses | Qt Academy Course Catalog, https://www.qt.io/academy/course-catalog
+What objects to use to make a timeline editor - Qt Forum, https://forum.qt.io/topic/144138/what-objects-to-use-to-make-a-timeline-editor
+Open Source Video Editing Software - Inside Wooster, https://inside.wooster.edu/technology/knowledge-base/open-source-video-editing/
+QtNodes — QtNodes 3.0 documentation, https://qtnodes.readthedocs.io/
+Started making graphics engine node editor on OpenGL. Idea is to only use GLSL to make programs and skip C++ part (github link in comments) : r/GraphicsProgramming - Reddit, https://www.reddit.com/r/GraphicsProgramming/comments/14a92na/started_making_graphics_engine_node_editor_on/
+Best Open Source Video Editor SDKs: 2025 Roundup | IMG.LY Blog, https://img.ly/blog/best-open-source-video-editor-sdks-2025-roundup/
+ffmpeg Documentation, https://ffmpeg.org/ffmpeg.html
+FFmpeg libav tutorial - learn how media works from basic to transmuxing, transcoding and more. Translations - GitHub, https://github.com/leandromoreira/ffmpeg-libav-tutorial
+5 Best Video Editing APIs & Libraries (Tested in 2026) - Banuba, https://www.banuba.com/blog/best-video-editing-apis-libraries-tested
+Using proxy files for editing hires video - LWKS Forum, https://forum.lwks.com/threads/using-proxy-files-for-editing-hires-video.122511/
+Generating Proxies with FFMpeg and PowerShell - Vasili's Blog, https://blog.vasi.li/generating-proxies-with-ffmpeg-and-powershell/
+What is the best proxy setting for my computer? : r/editors - Reddit, https://www.reddit.com/r/editors/comments/1rdfloa/what_is_the_best_proxy_setting_for_my_computer/
+Updated: The Complete Guide to Premiere Pro Proxies and Proxy Workflows, https://blog.frame.io/2024/07/29/updated-guide-premiere-pro-proxies-and-proxy-workflows/
+How To Edit Faster and Smoother with Proxies. (I know proxies are posted about weekly on here but I wanted to cover how to create proxies, how to attach proxies from a camera, as well as creating proxies for high frame fate footage like 120fps) : r/premiere - Reddit, https://www.reddit.com/r/premiere/comments/obroaa/how_to_edit_faster_and_smoother_with_proxies_i/
+How to create proxy file using FFMPEG in Pulse-IT : - Support - Freshdesk, https://embrace-support.freshdesk.com/support/solutions/articles/47000501598-creating-proxy-using-ffmpeg
+A Comprehensive Guide to Video Editing, https://www.videohusky.com/a-comprehensive-guide-to-video-editing/
+Most minimal proxy size recommendations : r/videography - Reddit, https://www.reddit.com/r/videography/comments/1px9ngg/most_minimal_proxy_size_recommendations/
+Best Practices for Video Playback: A Complete Guide (2025) - Mux, https://www.mux.com/articles/best-practices-for-video-playback-a-complete-guide-2025
+Video proxy file (h.264 / AVC) - ffmpeg - Super User, https://superuser.com/questions/1897064/video-proxy-file-h-264-avc
+How to Become a Video Editor in 2025: A Complete Guide - Noble Desktop, https://www.nobledesktop.com/careers/video-editor/become-a-video-editor
+OpenFX (API) - Wikipedia, https://en.wikipedia.org/wiki/OpenFX_(API)
+Designing your own node-based visual programming language - DEV Community, https://dev.to/cosmomyzrailgorynych/designing-your-own-node-based-visual-programming-language-2mpg
+GitHub - paceholder/nodeeditor: Qt Node Editor. Dataflow programming framework, https://github.com/paceholder/nodeeditor
+Qt/C++ Multimedia Player Video Clips, multiple video widgets - Stack Overflow, https://stackoverflow.com/questions/28362275/qt-c-multimedia-player-video-clips-multiple-video-widgets
+I built a GL-like 3D software renderer based on OpenGL 3.3 (with a virtual GPU layer), https://www.reddit.com/r/GraphicsProgramming/comments/1qdw1sq/i_built_a_gllike_3d_software_renderer_based_on/
+Processing Video With A GLSL Shader And Saving The Video - Processing Forum, https://forum.processing.org/two/discussion/20227/processing-video-with-a-glsl-shader-and-saving-the-video.html
+doc/examples/transcoding.c Source File - FFmpeg, https://ffmpeg.org/doxygen/2.6/transcoding_8c_source.html
+50 Video Editing Tips Every Video Editor Should Know - Student Filmmakers Magazine, https://studentfilmmakers.com/50-video-editing-tips-every-video-editor-should-know/
+C++ API — OpenColorIO v0.8.0 documentation, http://dbr.github.io/OpenColorIO/OpenColorIO.html
+Using OCIO - OpenColorIO - Read the Docs, https://opencolorio.readthedocs.io/en/v2.4.0/guides/using_ocio/using_ocio.html
+OpenColorIO and ACES color management - Adobe Help Center, https://helpx.adobe.com/after-effects/using/opencolorio-aces-color-management.html
+A list of open source C++ libraries - cppreference.com, https://saco-evaluator.org.za/docs/cppreference/en/cpp/links/libs.html
+GitHub - dyne/frei0r: A large collection of free and portable video plugins, https://github.com/dyne/frei0r
+Frei0r :: Free Video Effect Plugins - Dyne.org, https://dyne.org/software/frei0r/
+30-Day Video Editing Mastery Roadmap | PDF - Scribd, https://www.scribd.com/document/820946986/93f71d13-a470-4323-bfe7-6d249080d01a-The-30-Day-Roadmap-to-Master-Video-Editing
+Video Editing Mastery Roadmap | PDF - Scribd, https://www.scribd.com/document/859482479/Creating-a-Roadmap-to-Go-From-Zero-to-Expert-in-Vi
+30-Day Video Editing Mastery Plan | PDF | Editing | Animation - Scribd, https://www.scribd.com/document/784814028/Video-Editing-Road-Map
+Timeline | Qt Design Studio Documentation 4.8.1, https://doc.qt.io/qtdesignstudio/qtquick-timeline-view.html
+libopenshot | C++ Video Editing Library - OpenShot Video Editor, https://www.openshot.org/libopenshot/
+15 Creative Editing Techniques Every Video Editor Should Know - Pond5 Blog, https://blog.pond5.com/11099-13-creative-editing-techniques-every-video-editor-should-know/
+AcademySoftwareFoundation/OpenTimelineIO: Open Source API and interchange format for editorial timeline information. - GitHub, https://github.com/AcademySoftwareFoundation/OpenTimelineIO
+Top 10 Advanced video editing software for pc in 2025? - Shubham HD Studio, https://shubhamhdstudio.com/top-10-advanced-video-editing-software-for-pc-in-2025/
+OpenFX: the Open Visual Effects Standard, https://openeffects.org/
+Best Open Source C++ Video Software - SourceForge, https://sourceforge.net/directory/video/c-plus-plus/
+Encoding Best Practices for Live Streaming in 2025 | Resi, https://resi.io/blog/encoding-best-practices-for-live-streaming-in-2025/
+Plugin Formats Explained (VST, AU, AAX, etc), https://help.pluginboutique.com/hc/en-us/articles/6233336161428-Plugin-Formats-Explained-VST-AU-AAX-etc
+The LV2 audio plugin specification - GitHub, https://github.com/lv2/lv2
+Comparison of plugin formats - LV2, LADSPA, DSSI, VST : r/linuxaudio - Reddit, https://www.reddit.com/r/linuxaudio/comments/ebatmc/comparison_of_plugin_formats_lv2_ladspa_dssi_vst/
+Build a minimal VST3 host in C++ - Stack Overflow, https://stackoverflow.com/questions/24478173/build-a-minimal-vst3-host-in-c
+How to Instantiate a Vst3 plugin in code? For a vst3 host app - Stack Overflow, https://stackoverflow.com/questions/55640822/how-to-instantiate-a-vst3-plugin-in-code-for-a-vst3-host-app
+Qt Plotting Widget QCustomPlot - Introduction, https://www.qcustomplot.com/
+C bindings for the OpenTimelineIO Library (http://opentimeline.io) - GitHub, https://github.com/OpenTimelineIO/OpenTimelineIO-C-Bindings
+OpenFX documentation, https://openfx.readthedocs.io/_/downloads/en/main/epub/
+openfx/Support/README at main - GitHub, https://github.com/AcademySoftwareFoundation/openfx/blob/main/Support/README
+Tutorials - VST 3 Developer Portal - GitHub Pages, https://steinbergmedia.github.io/vst3_dev_portal/pages/Tutorials/Index.html
+LV2 overtaken by CLAP and VST3? - LinuxMusicians, https://linuxmusicians.com/viewtopic.php?t=28029
+Audio Plugin Formats Explained, https://tuxaudio.com/articles/audio-plugin-formats-explained/
+Feature Request: extra, standard plugin APIs (frei0r, LADSPA, OpenFX, et al.) · Issue #335 · olive-editor/olive - GitHub, https://github.com/olive-editor/olive/issues/335
+Incorporate frei0r-plugins as Filters - OBS Studio Ideas and Suggestions, https://ideas.obsproject.com/posts/106/incorporate-frei0r-plugins-as-filters
+I tried Olive Video Editor 0.2 (20221024+ds-1) but it has a small issues... : r/debian - Reddit, https://www.reddit.com/r/debian/comments/yg6s5s/i_tried_olive_video_editor_02_20221024ds1_but_it/
+community-content/tutorials/how-to-use-ffmpeg-for-video-editing/01.en.md at master, https://github.com/hetzneronline/community-content/blob/master/tutorials/how-to-use-ffmpeg-for-video-editing/01.en.md
+openfx - Conan 2.0: C and C++ Open Source Package Manager, https://conan.io/center/recipes/openfx
+Problems with external dependencies in C++ - kubasejdak.com, http://kubasejdak.com/blog/problems-with-external-dependencies-in-c/
+[BUILD] GCC 11 build error with -O2 -g · Issue #1590 · olive-editor/olive - GitHub, https://github.com/olive-editor/olive/issues/1590
+Reconnect full-resolution media to proxies - Adobe Help Center

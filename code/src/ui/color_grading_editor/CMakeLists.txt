@@ -1,0 +1,2 @@
+add_library(color_grading_editor INTERFACE)
+target_include_directories(color_grading_editor INTERFACE .)

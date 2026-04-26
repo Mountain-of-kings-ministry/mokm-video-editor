@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/untitled">
+    <file alias="qmldir">/home/david/Documents/projects/software/MOKM video-editor/code/build/untitled/qmldir</file>
+  </qresource>
+</RCC>
+
