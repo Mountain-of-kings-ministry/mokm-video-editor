@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.impl
 import QtQuick.Layouts
 import Mokm.Timeline 1.0
+import untitled
 
 Item {
     id: videoEditorWorkspace

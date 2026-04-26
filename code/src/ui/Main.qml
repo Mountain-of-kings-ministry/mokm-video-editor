@@ -7,6 +7,7 @@ import "preferences"
 import "proxy_manager"
 import "plugin_manager"
 import "keyboard_shortcuts"
+import untitled
 
 ApplicationWindow {
     id: mainWindow
@@ -15,6 +16,11 @@ ApplicationWindow {
     visible: true
     title: qsTr("MOKM Video Editor")
     color: Theme.surface
+
+    Component.onCompleted: {
+        console.log("Main UI Loaded")
+        console.log("Theme Surface Color: " + Theme.surface)
+    }
 
     // Instantiate Modals
     PreferencesModal { id: preferencesModal }

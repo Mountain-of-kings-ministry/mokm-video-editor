@@ -15,14 +15,14 @@ qt_add_executable(appmokmvideoeditor
 add_subdirectory(src)
 
 file(GLOB_RECURSE ICON_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/ui/icons/*.svg")
-set_source_files_properties(src/ui/core/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(src/ui/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(appmokmvideoeditor
     URI untitled
     VERSION 1.0
     QML_FILES
         src/ui/Main.qml
-        src/ui/core/Theme.qml
+        src/ui/Theme.qml
         src/ui/media_bin/MediaBinWorkspace.qml
         src/ui/video_editor/VideoEditorWorkspace.qml
         src/ui/node_editor/NodeEditorWorkspace.qml
