@@ -1,126 +1,122 @@
-import { CheckCircle2, Circle, Timer } from "lucide-react";
+import { CheckCircle2, Circle, Timer, ChevronRight } from "lucide-react";
 
 const phases = [
   {
     phase: "Phase 1",
     title: "Foundation",
-    status: "in-progress",
-    items: ["CMake + Qt 6 project setup", "FFmpeg decoding pipeline", "Basic playback & seeking", "Proxy generation core"],
+    status: "done",
+    frames: "0 - 120",
+    color: "bg-blue-500/20 border-blue-500/50"
   },
   {
     phase: "Phase 2",
-    title: "Core Editing",
-    status: "planned",
-    items: ["Multi-track timeline", "Cut/trim/razor tools", "Basic transitions", "Asset bin management", "Undo/redo + auto-save"],
+    title: "Core_Editing",
+    status: "in-progress",
+    frames: "120 - 240",
+    color: "bg-[var(--color-primary)]/20 border-[var(--color-primary)]/50"
   },
   {
     phase: "Phase 3",
-    title: "Node Engine",
+    title: "Node_Engine",
     status: "planned",
-    items: ["DAG node graph", "GLSL shader framework", "Transform & blend nodes", "Basic compositing"],
+    frames: "240 - 360",
+    color: "bg-purple-500/20 border-purple-500/50"
   },
   {
     phase: "Phase 4",
-    title: "Intermediate Features",
+    title: "Animation",
     status: "planned",
-    items: ["Keyframe animation (Bezier)", "Color correction tools", "Audio mixing & EQ", "Custom LUT support"],
+    frames: "360 - 480",
+    color: "bg-orange-500/20 border-orange-500/50"
   },
   {
     phase: "Phase 5",
-    title: "Professional Tier",
+    title: "Professional",
     status: "planned",
-    items: ["Advanced compositing & masking", "Motion tracking (OpenCV)", "HDR & OCIO color grading", "OFX / VST3 / LV2 plugin hosting", "OTIO interchange"],
+    frames: "480 - 600",
+    color: "bg-emerald-500/20 border-emerald-500/50"
   },
   {
     phase: "Phase 6",
-    title: "Polish & Optimization",
+    title: "Optimization",
     status: "planned",
-    items: ["Low-end hardware tuning", "UI/UX refinement", "Crash recovery", "Documentation & community"],
+    frames: "600 - 720",
+    color: "bg-pink-500/20 border-pink-500/50"
   },
 ];
 
 export default function Roadmap() {
   return (
-    <section id="roadmap" className="py-24 sm:py-32">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text)] dark:text-[var(--color-text-dark)] mb-4">
-            Development{" "}
-            <span className="text-[var(--color-primary)] dark:text-[var(--color-primary-dark)]">
-              Roadmap
-            </span>
-          </h2>
-          <p className="text-lg text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
-            A phased approach to building a professional-grade open-source NLE.
-          </p>
+    <div className="flex flex-col h-full select-none">
+      {/* Timeline Header / Ruler */}
+      <div className="h-8 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] flex items-center bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)]">
+        <div className="w-48 border-r border-[var(--color-border)] dark:border-[var(--color-border-dark)] h-full flex items-center px-3">
+          <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">Timeline</span>
         </div>
-
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-6 sm:left-8 top-0 bottom-0 w-px bg-[var(--color-border)] dark:bg-[var(--color-border-dark)]" />
-
-          <div className="space-y-10">
-            {phases.map((phase) => {
-              const isDone = phase.status === "done";
-              const isInProgress = phase.status === "in-progress";
-
-              return (
-                <div key={phase.phase} className="relative flex gap-6 sm:gap-8">
-                  {/* Timeline dot */}
-                  <div className="flex-shrink-0 relative z-10">
-                    <div
-                      className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center border-2 ${
-                        isDone
-                          ? "bg-[var(--color-primary)] dark:bg-[var(--color-primary-dark)] border-[var(--color-primary)] dark:border-[var(--color-primary-dark)]"
-                          : isInProgress
-                          ? "bg-[var(--color-primary)]/10 dark:bg-[var(--color-primary-dark)]/10 border-[var(--color-primary)] dark:border-[var(--color-primary-dark)]"
-                          : "bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)] border-[var(--color-border)] dark:border-[var(--color-border-dark)]"
-                      }`}
-                    >
-                      {isDone ? (
-                        <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 text-[var(--color-text-inverse)] dark:text-[var(--color-text-inverse-dark)]" />
-                      ) : isInProgress ? (
-                        <Timer className="w-6 h-6 sm:w-8 sm:h-8 text-[var(--color-primary)] dark:text-[var(--color-primary-dark)]" />
-                      ) : (
-                        <Circle className="w-6 h-6 sm:w-8 sm:h-8 text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]" />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 pt-2 sm:pt-3">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-medium text-[var(--color-primary)] dark:text-[var(--color-primary-dark)] uppercase tracking-wider">
-                        {phase.phase}
-                      </span>
-                      {isInProgress && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)]/10 dark:bg-[var(--color-primary-dark)]/10 text-[var(--color-primary)] dark:text-[var(--color-primary-dark)]">
-                          In Progress
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[var(--color-text)] dark:text-[var(--color-text-dark)] mb-3">
-                      {phase.title}
-                    </h3>
-                    <ul className="space-y-2">
-                      {phase.items.map((item) => (
-                        <li
-                          key={item}
-                          className="flex items-start gap-2 text-sm sm:text-base text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]"
-                        >
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]/50 dark:bg-[var(--color-primary-dark)]/50 flex-shrink-0" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
+        <div className="flex-1 h-full relative overflow-hidden">
+          {/* Ruler Marks */}
+          <div className="absolute inset-0 flex items-end">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <span className="text-[8px] opacity-30 mb-1">{i * 60}f</span>
+                <div className="w-px h-2 bg-current opacity-20" />
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </section>
+      
+      {/* Timeline Tracks */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex min-w-[1200px]">
+          {/* Track Headers */}
+          <div className="w-48 border-r border-[var(--color-border)] dark:border-[var(--color-border-dark)] shrink-0 bg-[var(--color-base)] dark:bg-[var(--color-base-dark)]">
+            <div className="h-12 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] flex items-center px-3 gap-2 hover:bg-[var(--color-panel)] transition-colors cursor-pointer group">
+              <ChevronRight className="w-3 h-3 opacity-40 group-hover:rotate-90 transition-transform" />
+              <span className="text-[10px] font-bold opacity-80 uppercase">Dev_Roadmap</span>
+            </div>
+            <div className="h-12 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] flex items-center px-3 gap-2 opacity-40">
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-[10px] font-bold uppercase">Audio_Engine</span>
+            </div>
+            <div className="h-12 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] flex items-center px-3 gap-2 opacity-40">
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-[10px] font-bold uppercase">UI_Refinement</span>
+            </div>
+          </div>
+
+          {/* Track Content */}
+          <div className="flex-1 relative bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)]/10">
+            {/* Playhead Guide */}
+            <div className="absolute top-0 bottom-0 left-[200px] w-px bg-[var(--color-primary)] z-10 shadow-[0_0_10px_var(--color-glow)]">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--color-primary)] rounded-b-sm" />
+            </div>
+
+            <div className="h-12 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] flex items-center px-4 gap-1">
+              {phases.map((phase, i) => (
+                <div 
+                  key={i}
+                  className={`h-8 w-44 border rounded flex flex-col justify-center px-2 cursor-help transition-all hover:scale-[1.02] ${phase.color}`}
+                  title={`${phase.title}: ${phase.status}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold truncate">{phase.title}</span>
+                    {phase.status === "done" ? (
+                      <CheckCircle2 className="w-2.5 h-2.5 text-blue-500" />
+                    ) : phase.status === "in-progress" ? (
+                      <Timer className="w-2.5 h-2.5 text-[var(--color-primary)] animate-pulse" />
+                    ) : (
+                      <Circle className="w-2.5 h-2.5 opacity-30" />
+                    )}
+                  </div>
+                  <span className="text-[7px] opacity-50 font-mono">{phase.frames}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,2 +1,0 @@
-add_library(keyboard_shortcuts INTERFACE)
-target_include_directories(keyboard_shortcuts INTERFACE .)

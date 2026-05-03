@@ -1,55 +1,75 @@
+import { ChevronDown, Info } from "lucide-react";
+
 const technologies = [
-  { name: "C++20", category: "Language" },
-  { name: "Qt 6.5+", category: "UI Framework" },
-  { name: "FFmpeg", category: "Multimedia" },
-  { name: "OpenColorIO", category: "Color" },
-  { name: "OpenTimelineIO", category: "Interchange" },
-  { name: "OpenCV", category: "Vision" },
-  { name: "GLSL", category: "Shaders" },
-  { name: "CMake", category: "Build" },
-  { name: "OpenFX", category: "Plugins" },
-  { name: "VST3", category: "Audio" },
-  { name: "LV2", category: "Audio" },
-  { name: "CLAP", category: "Audio" },
-  { name: "Vulkan", category: "Graphics" },
-  { name: "Metal", category: "Graphics" },
-  { name: "Direct3D", category: "Graphics" },
-  { name: "SQLite", category: "Database" },
+  { name: "C++20", category: "Language", value: "Native" },
+  { name: "Qt 6.5+", category: "Framework", value: "6.5.3" },
+  { name: "FFmpeg", category: "Multimedia", value: "libav" },
+  { name: "OpenColorIO", category: "Color Science", value: "v2.4" },
+  { name: "QtNodes", category: "Node Graph", value: "Dataflow" },
+  { name: "OpenCV", category: "Computer Vision", value: "Tracking" },
+  { name: "OpenTimelineIO", category: "Interchange", value: "OTIO" },
+  { name: "OpenFX", category: "Plugin API", value: "v1.4" },
 ];
 
 export default function TechStack() {
   return (
-    <section id="tech" className="py-24 sm:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text)] dark:text-[var(--color-text-dark)] mb-4">
-            Built on Proven{" "}
-            <span className="text-[var(--color-primary)] dark:text-[var(--color-primary-dark)]">
-              Open-Source Foundations
-            </span>
-          </h2>
-          <p className="text-lg text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
-            No reinventing the wheel. MOKM integrates industry-standard libraries to deliver professional results.
-          </p>
+    <div className="flex flex-col h-full select-none text-[11px]">
+      <div className="h-8 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] flex items-center px-3 bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)]">
+        <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">Inspector</span>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-3 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)]">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 rounded bg-[var(--color-primary)]/10 flex items-center justify-center">
+              <Info className="w-5 h-5 text-[var(--color-primary)]" />
+            </div>
+            <div>
+              <div className="font-bold">Project_Settings</div>
+              <div className="text-[9px] opacity-50 uppercase">Configuration</div>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {technologies.map((tech) => (
-            <div
-              key={tech.name}
-              className="group relative p-4 rounded-xl bg-[var(--color-panel)]/30 dark:bg-[var(--color-panel-dark)]/30 border border-[var(--color-border)] dark:border-[var(--color-border-dark)] hover:border-[var(--color-primary)]/40 dark:hover:border-[var(--color-primary-dark)]/40 transition-all text-center"
-            >
-              <div className="text-base font-semibold text-[var(--color-text)] dark:text-[var(--color-text-dark)] group-hover:text-[var(--color-primary)] dark:group-hover:text-[var(--color-primary-dark)] transition-colors">
-                {tech.name}
+        <div className="p-0">
+          <div className="bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)]/30 px-3 py-1 flex items-center gap-1 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)]">
+            <ChevronDown className="w-3 h-3 opacity-40" />
+            <span className="font-bold opacity-60 uppercase text-[9px]">Technical_Stack</span>
+          </div>
+
+          <div className="p-3 space-y-3">
+            {technologies.map((tech) => (
+              <div key={tech.name} className="flex items-center">
+                <span className="w-24 text-[var(--color-text-muted)] shrink-0 font-mono text-[10px]">{tech.name}</span>
+                <div className="flex-1 h-6 bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)] border border-[var(--color-border)] dark:border-[var(--color-border-dark)] rounded px-2 flex items-center justify-between group hover:border-[var(--color-primary)] transition-colors">
+                  <span className="truncate">{tech.value}</span>
+                  <span className="text-[8px] opacity-0 group-hover:opacity-40 uppercase">{tech.category}</span>
+                </div>
               </div>
-              <div className="text-xs text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)] mt-1 uppercase tracking-wider">
-                {tech.category}
-              </div>
+            ))}
+          </div>
+
+          <div className="bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)]/30 px-3 py-1 flex items-center gap-1 border-y border-[var(--color-border)] dark:border-[var(--color-border-dark)] mt-4">
+            <ChevronDown className="w-3 h-3 opacity-40" />
+            <span className="font-bold opacity-60 uppercase text-[9px]">Target_Platforms</span>
+          </div>
+          <div className="p-3 space-y-2 opacity-60">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" checked readOnly className="accent-[var(--color-primary)]" />
+              <span>Windows (x64)</span>
             </div>
-          ))}
+            <div className="flex items-center gap-2">
+              <input type="checkbox" checked readOnly className="accent-[var(--color-primary)]" />
+              <span>macOS (Silicon/Intel)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" checked readOnly className="accent-[var(--color-primary)]" />
+              <span>Linux (X11/Wayland)</span>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 

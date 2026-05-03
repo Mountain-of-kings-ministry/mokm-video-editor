@@ -37,7 +37,8 @@ html {
 
 html,
 body {
-  @apply bg-surface text-text;
+  @apply bg-surface text-text overflow-hidden;
+  height: 100vh;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,5 +47,23 @@ body {
     @apply bg-surface-dark text-text-dark;
     color-scheme: dark;
   }
+}
+
+/* Custom Workspace Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-[var(--color-border)] rounded-full hover:bg-[var(--color-primary)] transition-colors;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-[var(--color-border-dark)];
 }
 

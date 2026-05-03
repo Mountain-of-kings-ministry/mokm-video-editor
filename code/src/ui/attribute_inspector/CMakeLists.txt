@@ -1,2 +1,0 @@
-add_library(attribute_inspector INTERFACE)
-target_include_directories(attribute_inspector INTERFACE .)

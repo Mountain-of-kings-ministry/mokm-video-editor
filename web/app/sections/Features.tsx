@@ -1,97 +1,82 @@
-import { Network, Film, Plug, Layers, Palette, ScanEye, Cpu, Monitor } from "lucide-react";
+import { 
+  Network, 
+  Zap, 
+  Plug, 
+  Layers, 
+  Box, 
+  Maximize, 
+  Monitor, 
+  Repeat, 
+  ChevronDown, 
+  FileJson,
+  Video
+} from "lucide-react";
 
 const features = [
-  {
-    icon: Network,
-    title: "Node-Based Compositing",
-    description:
-      "Directed Acyclic Graph (DAG) with pull-based lazy evaluation. Build complex composites with GLSL shader nodes, ROI optimization, and transparent proxy/original switching.",
-  },
-  {
-    icon: Film,
-    title: "Proxy-First Editing",
-    description:
-      "Automatic background transcoding on import. Edit 4K footage smoothly on decade-old hardware using ProRes Proxy or H.264 I-frame proxies.",
-  },
-  {
-    icon: Plug,
-    title: "Plugin Extensibility",
-    description:
-      "Host OpenFX (OFX) video effects, VST3 / LV2 / CLAP audio processors, and Frei0r lightweight filters. Build custom nodes with C++.",
-  },
-  {
-    icon: Layers,
-    title: "Multi-Track Timeline",
-    description:
-      "Independent audio and video tracks with frame-accurate cutting, trimming, and razor tools. Custom C++ render node for 60 FPS timeline scrubbing.",
-  },
-  {
-    icon: Palette,
-    title: "HDR & Color Grading",
-    description:
-      "10-bit / 12-bit HDR workflows with OpenColorIO (OCIO) and ACES color management. Real-time vectorscopes, waveform monitors, and LUT support.",
-  },
-  {
-    icon: ScanEye,
-    title: "Motion Tracking",
-    description:
-      "Planar and point tracking powered by OpenCV. Pin elements to moving video with precise rotoscoping and masking tools.",
-  },
-  {
-    icon: Cpu,
-    title: "Hardware Acceleration",
-    description:
-      "NVENC, QuickSync, and VAAPI decoding/encoding. Zero-copy GPU pipelines and SIMD optimizations (SSE/AVX/NEON) for maximum performance.",
-  },
-  {
-    icon: Monitor,
-    title: "Cross-Platform",
-    description:
-      "Native builds for Windows, macOS, and Linux using Qt 6 RHI (Vulkan/Metal/Direct3D). One codebase, professional performance everywhere.",
-  },
+  { icon: Network, title: "Node_Logic.dag", type: "Logic" },
+  { icon: Layers, title: "Hybrid_Timeline.composition", type: "Timeline" },
+  { icon: Repeat, title: "Procedural_Engine.solver", type: "Engine" },
+  { icon: Maximize, title: "Responsive_Layout.layout", type: "System" },
+  { icon: Box, title: "Scene_3D.usd", type: "3D Asset" },
+  { icon: Zap, title: "ThorVG_Rasterizer.renderer", type: "Renderer" },
+  { icon: Plug, title: "Plugin_Host.api", type: "API" },
+  { icon: Monitor, title: "Native_Core.bin", type: "Binary" },
 ];
 
 export default function Features() {
   return (
-    <section id="features" className="py-24 sm:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--color-text)] dark:text-[var(--color-text-dark)] mb-4">
-            Everything You Need for{" "}
-            <span className="text-[var(--color-primary)] dark:text-[var(--color-primary-dark)]">
-              Professional Post-Production
-            </span>
-          </h2>
-          <p className="text-lg text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)]">
-            From basic cuts to cinema-grade compositing, MOKM scales with your ambition.
-          </p>
+    <div className="flex flex-col h-full select-none">
+      <div className="h-8 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] flex items-center px-3 bg-[var(--color-panel)] dark:bg-[var(--color-panel-dark)]">
+        <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">Project Bin</span>
+      </div>
+      
+      <div className="flex-1 p-2 space-y-4">
+        {/* Assets Folder */}
+        <div>
+          <div className="flex items-center gap-1 mb-2">
+            <ChevronDown className="w-3 h-3 opacity-40" />
+            <span className="text-[11px] font-semibold opacity-80">Core_Features</span>
+          </div>
+          
+          <div className="pl-4 space-y-1">
+            {features.map((feature, i) => (
+              <div 
+                key={i}
+                className="group flex items-center justify-between p-1.5 rounded hover:bg-[var(--color-primary)]/10 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <feature.icon className="w-3.5 h-3.5 text-[var(--color-primary)] dark:text-[var(--color-primary-dark)]" />
+                  <span className="text-[11px] font-mono truncate max-w-[120px]">
+                    {feature.title}
+                  </span>
+                </div>
+                <span className="text-[9px] opacity-40 group-hover:opacity-100 transition-opacity">
+                  {feature.type}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <div
-                key={feature.title}
-                className="group relative p-6 rounded-2xl bg-[var(--color-panel)]/40 dark:bg-[var(--color-panel-dark)]/40 border border-[var(--color-border)] dark:border-[var(--color-border-dark)] hover:border-[var(--color-primary)]/40 dark:hover:border-[var(--color-primary-dark)]/40 transition-all hover:shadow-[0_0_30px_var(--color-glow)] dark:hover:shadow-[0_0_30px_var(--color-glow-dark)]"
-              >
-                <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 dark:bg-[var(--color-primary-dark)]/10 text-[var(--color-primary)] dark:text-[var(--color-primary-dark)] group-hover:scale-110 transition-transform">
-                  <Icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-semibold text-[var(--color-text)] dark:text-[var(--color-text-dark)] mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-[var(--color-text-muted)] dark:text-[var(--color-text-muted-dark)] leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
+        {/* Assets Folder 2 */}
+        <div>
+          <div className="flex items-center gap-1 mb-2">
+            <ChevronDown className="w-3 h-3 opacity-40" />
+            <span className="text-[11px] font-semibold opacity-80">Documentation</span>
+          </div>
+          <div className="pl-4 space-y-1">
+            <div className="flex items-center gap-2 p-1.5 rounded hover:bg-[var(--color-primary)]/10 cursor-pointer">
+              <FileJson className="w-3.5 h-3.5 text-blue-400" />
+              <span className="text-[11px] font-mono">README.md</span>
+            </div>
+            <div className="flex items-center gap-2 p-1.5 rounded hover:bg-[var(--color-primary)]/10 cursor-pointer">
+              <Video className="w-3.5 h-3.5 text-red-400" />
+              <span className="text-[11px] font-mono">Quick_Start.mp4</span>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
