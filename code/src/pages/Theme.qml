@@ -3,7 +3,7 @@ import QtQuick 2.15
 
 QtObject {
     // Base
-    readonly property color background: "#020617"   // slate-950
+    readonly property color background: '#0f0f0f'   // slate-950
     readonly property color foreground: "#f8fafc"   // slate-50
 
     // Primary (Gold)

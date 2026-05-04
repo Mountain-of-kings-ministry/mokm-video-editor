@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
         []()
         { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-    engine.loadFromModule("learConnection_2", "SplashScreen");
+    engine.loadFromModule("mokm_video_editor", "SplashScreen");
 
     return QCoreApplication::exec();
 }

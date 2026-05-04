@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(learConnection_2 VERSION 0.1 LANGUAGES CXX)
+project(mokm_video_editor VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTORCC ON)
@@ -9,7 +9,7 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.10)
 
-qt_add_executable(applearConnection_2
+qt_add_executable(appmokm_video_editor
     main.cpp
     src/resources/resources.qrc
 )
@@ -29,36 +29,55 @@ foreach(dir ${FUNCTION_SUBDIRS})
     endif()
 endforeach()
 
-qt_add_qml_module(applearConnection_2
-    URI learConnection_2
+qt_add_qml_module(appmokm_video_editor
+    URI mokm_video_editor
     QML_FILES
         src/pages/Main.qml
         src/pages/Theme.qml
         src/pages/SplashScreen.qml
-        SOURCES ${FUNCTION_SOURCES}
-        RESOURCES src/resources/resources.qrc
+        src/pages/MediaBinPage.qml
+        src/pages/EditorPage.qml
+        src/pages/NodeEditorPage.qml
+        src/pages/AudioPage.qml
+        src/pages/CompositorPage.qml
+        src/pages/HistoryPage.qml
+        src/pages/RendererPage.qml
+        src/pages/SettingsPage.qml
+        src/pages/components/SidebarButton.qml
+        src/pages/components/Sidebar.qml
+        src/pages/components/EditorToolBar.qml
+        src/pages/components/PanelHeader.qml
+        src/pages/components/StatusBar.qml
+        src/pages/components/TimelineRuler.qml
+        src/pages/components/TimelineTrack.qml
+        src/pages/components/NodeSocket.qml
+    SOURCES ${FUNCTION_SOURCES}
+    RESOURCES src/resources/resources.qrc
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
-set_target_properties(applearConnection_2 PROPERTIES
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.applearConnection_2
+set_target_properties(appmokm_video_editor PROPERTIES
+#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appmokm_video_editor
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(applearConnection_2
+target_link_libraries(appmokm_video_editor
     PRIVATE Qt6::Quick
 )
 
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickEffects)
+target_link_libraries(appmokm_video_editor PRIVATE Qt6::Quick Qt6::QuickEffects)
+
 if(FUNCTION_INCLUDE_DIRS)
-    target_include_directories(applearConnection_2 PRIVATE ${FUNCTION_INCLUDE_DIRS})
+    target_include_directories(appmokm_video_editor PRIVATE ${FUNCTION_INCLUDE_DIRS})
 endif()
 
-install(TARGETS applearConnection_2
+install(TARGETS appmokm_video_editor
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

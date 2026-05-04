@@ -1,64 +1,74 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import kingClass
-import learConnection_2
+
+
+// C++ integration — uncomment when bridging backend:
+// import kingClass
+
+import mokm_video_editor
 
 Window {
-    width: 640
-    height: 480
+    id: mainWindow
+    width: 1280
+    height: 800
+    minimumWidth: 960
+    minimumHeight: 600
     visible: true
-    title: qsTr("Learning Connections")
+    title: qsTr("MOKM Effector")
 
-    // Use loaded theme as the app color source
     color: Theme.background
 
-    SomeClass {
-        id: someClass
-    }
+    // C++ integration — uncomment when bridging backend:
+    // SomeClass {
+    //     id: someClass
+    // }
+    //
+    // Connections {
+    //     target: someClass
+    //     onManagerChanged: { /* handle state change */ }
+    // }
 
-    Connections {
-        target: someClass
-        onManagerChanged: inputxt.text = someClass.getManagerState()
-    }
+    RowLayout {
+        anchors.fill: parent
+        spacing: 0
 
-    ColumnLayout {
-        x: 180
-        y: 155
-        width: 281
-        height: 171
+        // Sidebar navigation
+        Sidebar {
+            id: sidebar
+            Layout.fillHeight: true
 
-        Text {
-            id: inputxt
-            // text: someClass.getManagerState()
+            onPageSelected: function (index) {
+                contentStack.currentIndex = index;
+            }
         }
 
-        Button {
-            id: button
-            text: "clcik me to see state change"
-            icon.source: "qrc:/icons/outline/aerial-lift.svg"
-            display: AbstractButton.TextBesideIcon
-            hoverEnabled: true
+        // Main content area
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 0
 
-            background: Rectangle {
-                id: buttonBg
-                anchors.fill: parent
-                color: Theme.primary
-                radius: 6
+            StackLayout {
+                id: contentStack
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                currentIndex: 0
+
+                MediaBinPage {}
+                EditorPage {}
+                NodeEditorPage {}
+                AudioPage {}
+                CompositorPage {}
+                HistoryPage {}
+                RendererPage {}
+                SettingsPage {}
             }
 
-            onHoveredChanged: {
-                buttonBg.color = hovered ? Theme.primaryHover : Theme.primary;
-            }
-            onClicked: {
-                someClass.setManager("kings manager state");
-            }
-
-            Connections {
-                target: button
-                function onClicked() {
-                    console.log("clicked");
-                }
+            // Status bar
+            StatusBar {
+                Layout.fillWidth: true
+                projectName: "MOKM Project"
             }
         }
     }

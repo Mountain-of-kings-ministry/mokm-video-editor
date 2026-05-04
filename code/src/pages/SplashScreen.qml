@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import learConnection_2
+import mokm_video_editor
 
 Window {
     id: splash
@@ -15,22 +15,39 @@ Window {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 12
+        spacing: 16
 
         Rectangle {
-            width: 120
-            height: 120
+            width: 100
+            height: 100
             color: Theme.primary
-            radius: 12
-            border.color: Theme.border
-            anchors.horizontalCenter: parent.horizontalCenter
+            radius: 16
+            Layout.alignment: Qt.AlignHCenter
+
+            Text {
+                anchors.centerIn: parent
+                text: "M"
+                color: Theme.background
+                font.pixelSize: 40
+                font.bold: true
+            }
         }
 
         Text {
-            text: qsTr("learConnection")
+            text: qsTr("MOKM VIDEO EDITOR")
             color: Theme.foreground
-            font.pixelSize: 20
+            font.pixelSize: 22
+            font.weight: Font.Medium
             horizontalAlignment: Text.AlignHCenter
+            Layout.alignment: Qt.AlignHCenter
+        }
+
+        Text {
+            text: qsTr("Initializing...")
+            color: Theme.mutedForeground
+            font.pixelSize: 12
+            horizontalAlignment: Text.AlignHCenter
+            Layout.alignment: Qt.AlignHCenter
         }
     }
 
@@ -45,7 +62,6 @@ Window {
         running: true
         repeat: false
         onTriggered: {
-            // load Main.qml (same dir)
             mainLoader.source = "Main.qml";
             mainLoader.asynchronous = false;
         }
@@ -54,7 +70,7 @@ Window {
     // hide splash when main Window is ready
     Connections {
         target: mainLoader
-        onStatusChanged: {
+        function onStatusChanged() {
             if (mainLoader.status === Loader.Ready && mainLoader.item && mainLoader.item.visible) {
                 splash.visible = false;
             }
