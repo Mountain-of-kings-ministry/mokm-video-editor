@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import mokm_video_editor
 import QtQuick.Effects
+import mokm_video_editor
 
 Item {
     id: editorPage
@@ -40,6 +40,7 @@ Item {
                         height: 48
                         sourceSize: Qt.size(48, 48)
                         opacity: 0.15
+                        layer.enabled: true
                         layer.effect: MultiEffect {
                             colorization: 1.0
                             colorizationColor: Theme.foreground
@@ -94,6 +95,7 @@ Item {
                                     height: width
                                     sourceSize: Qt.size(width, height)
                                     opacity: modelData.indexOf("player-play") >= 0 ? 1.0 : 0.5
+                                    layer.enabled: true
                                     layer.effect: MultiEffect {
                                         colorization: 1.0
                                         colorizationColor: Theme.foreground
@@ -169,6 +171,7 @@ Item {
                                 height: 16
                                 sourceSize: Qt.size(16, 16)
                                 opacity: 0.5
+                                layer.enabled: true
                                 layer.effect: MultiEffect {
                                     colorization: 1.0
                                     colorizationColor: Theme.foreground
@@ -192,6 +195,105 @@ Item {
                         Layout.fillWidth: true
                     }
 
+                    // Add track buttons
+                    Rectangle {
+                        width: 28
+                        height: 28
+                        radius: 4
+                        color: "transparent"
+                        Layout.alignment: Qt.AlignVCenter
+
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 2
+
+                            Image {
+                                anchors.verticalCenter: parent.verticalCenter
+                                source: "qrc:/icons/outline/plus.svg"
+                                width: 14
+                                height: 14
+                                sourceSize: Qt.size(14, 14)
+                                layer.enabled: true
+                                layer.effect: MultiEffect {
+                                    colorization: 1.0
+                                    colorizationColor: Theme.accent
+                                    brightness: 1.0
+                                }
+                            }
+
+                            Text {
+                                text: "V"
+                                color: Theme.accent
+                                font.pixelSize: 10
+                                font.weight: Font.Medium
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: trackModel.addVideoTrack()
+                            onEntered: parent.color = Theme.secondaryHover
+                            onExited: parent.color = "transparent"
+                        }
+
+                        ToolTip.visible: false
+                        ToolTip.text: "Add Video Track"
+                    }
+
+                    Rectangle {
+                        width: 28
+                        height: 28
+                        radius: 4
+                        color: "transparent"
+                        Layout.alignment: Qt.AlignVCenter
+
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 2
+
+                            Image {
+                                anchors.verticalCenter: parent.verticalCenter
+                                source: "qrc:/icons/outline/plus.svg"
+                                width: 14
+                                height: 14
+                                sourceSize: Qt.size(14, 14)
+                                layer.enabled: true
+                                layer.effect: MultiEffect {
+                                    colorization: 1.0
+                                    colorizationColor: Theme.success
+                                    brightness: 1.0
+                                }
+                            }
+
+                            Text {
+                                text: "A"
+                                color: Theme.success
+                                font.pixelSize: 10
+                                font.weight: Font.Medium
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: trackModel.addAudioTrack()
+                            onEntered: parent.color = Theme.secondaryHover
+                            onExited: parent.color = "transparent"
+                        }
+
+                        ToolTip.visible: false
+                        ToolTip.text: "Add Audio Track"
+                    }
+
+                    Item {
+                        Layout.preferredWidth: 8
+                    }
+
                     // Zoom controls
                     Image {
                         source: "qrc:/icons/outline/zoom-out.svg"
@@ -200,6 +302,7 @@ Item {
                         sourceSize: Qt.size(14, 14)
                         opacity: 0.4
                         Layout.alignment: Qt.AlignVCenter
+                        layer.enabled: true
                         layer.effect: MultiEffect {
                             colorization: 1.0
                             colorizationColor: Theme.foreground
@@ -229,6 +332,7 @@ Item {
                         sourceSize: Qt.size(14, 14)
                         opacity: 0.4
                         Layout.alignment: Qt.AlignVCenter
+                        layer.enabled: true
                         layer.effect: MultiEffect {
                             colorization: 1.0
                             colorizationColor: Theme.foreground
@@ -242,7 +346,7 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                // Timeline tracks
+                // Timeline tracks - Dynamic from TrackModel
                 Flickable {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -254,28 +358,18 @@ Item {
                         width: parent.width
                         spacing: 0
 
-                        TimelineTrack {
-                            width: parent.width
-                            trackName: "V1"
-                            trackColor: Theme.accent
-                        }
+                        Repeater {
+                            model: trackModel
 
-                        TimelineTrack {
-                            width: parent.width
-                            trackName: "V2"
-                            trackColor: "#8b5cf6"
-                        }
-
-                        TimelineTrack {
-                            width: parent.width
-                            trackName: "A1"
-                            trackColor: Theme.success
-                        }
-
-                        TimelineTrack {
-                            width: parent.width
-                            trackName: "A2"
-                            trackColor: "#14b8a6"
+                            TimelineTrack {
+                                width: parent.width
+                                trackName: model.trackName
+                                trackColor: model.trackColor
+                                trackType: model.trackType
+                                trackLocked: model.trackLocked
+                                trackVisible: model.trackVisible
+                                mediaCount: model.trackMediaCount
+                            }
                         }
                     }
                 }

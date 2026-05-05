@@ -29,6 +29,20 @@ foreach(dir ${FUNCTION_SUBDIRS})
     endif()
 endforeach()
 
+# Automatically find all cpp and h files in src/providers
+file(GLOB_RECURSE PROVIDER_SOURCES "src/providers/*.cpp" "src/providers/*.h")
+
+# Add src/providers directly to include path
+list(APPEND PROVIDER_INCLUDE_DIRS "src/providers")
+
+# Also find any subdirectories in src/providers for include path
+file(GLOB PROVIDER_SUBDIRS "src/providers/*")
+foreach(dir ${PROVIDER_SUBDIRS})
+    if(IS_DIRECTORY ${dir})
+        list(APPEND PROVIDER_INCLUDE_DIRS ${dir})
+    endif()
+endforeach()
+
 qt_add_qml_module(appmokm_video_editor
     URI mokm_video_editor
     QML_FILES
@@ -51,7 +65,8 @@ qt_add_qml_module(appmokm_video_editor
         src/pages/components/TimelineRuler.qml
         src/pages/components/TimelineTrack.qml
         src/pages/components/NodeSocket.qml
-    SOURCES ${FUNCTION_SOURCES}
+        src/pages/components/MediaPreviewPanel.qml
+    SOURCES ${FUNCTION_SOURCES} ${PROVIDER_SOURCES}
     RESOURCES src/resources/resources.qrc
 )
 
@@ -70,11 +85,15 @@ target_link_libraries(appmokm_video_editor
     PRIVATE Qt6::Quick
 )
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickEffects)
-target_link_libraries(appmokm_video_editor PRIVATE Qt6::Quick Qt6::QuickEffects)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickEffects Core Multimedia)
+target_link_libraries(appmokm_video_editor PRIVATE Qt6::Quick Qt6::QuickEffects Qt6::Core Qt6::Multimedia)
 
 if(FUNCTION_INCLUDE_DIRS)
     target_include_directories(appmokm_video_editor PRIVATE ${FUNCTION_INCLUDE_DIRS})
+endif()
+
+if(PROVIDER_INCLUDE_DIRS)
+    target_include_directories(appmokm_video_editor PRIVATE ${PROVIDER_INCLUDE_DIRS})
 endif()
 
 install(TARGETS appmokm_video_editor
