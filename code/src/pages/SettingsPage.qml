@@ -100,7 +100,7 @@ Item {
                                 layer.enabled: true
                                 layer.effect: MultiEffect {
                                     colorization: 1.0
-                                    colorizationColor: settingsPage.selectedCategory === index ? Theme.primary : (mouseArea.containsMouse ? Theme.foreground : "#8c8c8c")
+                                    colorizationColor: settingsPage.selectedCategory === index ? Theme.primary : Theme.foreground
                                     brightness: 1.0
                                 }
                             }
@@ -258,7 +258,7 @@ Item {
                                             layer.enabled: true
                                             layer.effect: MultiEffect {
                                                 colorization: 1.0
-                                                colorizationColor: settingsPage.selectedCategory === index ? Theme.primary : (mouseArea.containsMouse ? Theme.foreground : "#8c8c8c")
+                                                colorizationColor: settingsPage.selectedCategory === index ? Theme.primary : Theme.foreground
                                                 brightness: 1.0
                                             }
                                         }

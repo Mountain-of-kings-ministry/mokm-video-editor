@@ -45,7 +45,7 @@ Item {
                         layer.enabled: true
                         layer.effect: MultiEffect {
                             colorization: 1.0
-                            colorizationColor: modelData.tip === "Add Node" ? Theme.primary : (mouseArea.containsMouse ? Theme.foreground : "#8c8c8c")
+                            colorizationColor: modelData.tip === "Add Node" ? Theme.primary : Theme.foreground
                             brightness: 1.0
                         }
                     }

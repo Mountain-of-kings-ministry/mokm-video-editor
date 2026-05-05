@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-
 // C++ integration — uncomment when bridging backend:
 // import kingClass
 
@@ -15,7 +14,7 @@ Window {
     minimumWidth: 960
     minimumHeight: 600
     visible: true
-    title: qsTr("MOKM Effector")
+    title: qsTr("MOKM Video Editor")
 
     color: Theme.background
 
