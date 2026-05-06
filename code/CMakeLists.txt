@@ -70,8 +70,8 @@ endforeach()
             src/pages/components/MediaPreviewPanel.qml
             src/pages/components/docking/DockManager.qml
             src/pages/components/docking/DockPanel.qml
-            src/pages/components/docking/DockSplitter.qml
             src/pages/components/docking/DockRoot.qml
+            src/pages/components/docking/SplitContainer.qml
             src/pages/components/docking/FloatingWindow.qml
             src/pages/components/panels/PreviewPanel.qml
             src/pages/components/panels/MiniBin.qml

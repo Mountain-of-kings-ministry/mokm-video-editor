@@ -276,7 +276,8 @@ Rectangle {
 
         // Empty state
         ColumnLayout {
-            anchors.centerIn: parent
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             spacing: 12
             visible: trackModel.trackCount === 0
 

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 
 Rectangle {
     id: root
@@ -27,7 +28,7 @@ Rectangle {
                 color: Theme.mutedForeground
                 font.pixelSize: 9
                 font.weight: Font.Medium
-                letterSpacing: 1
+                font.letterSpacing: 1
             }
         }
 
@@ -150,31 +151,36 @@ Rectangle {
         }
 
         // Empty state
-        ColumnLayout {
-            anchors.centerIn: parent
-            spacing: 12
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             visible: trackModel.trackCount === 0
 
-            Image {
-                Layout.alignment: Qt.AlignHCenter
-                source: "qrc:/icons/outline/adjustments.svg"
-                width: 32
-                height: 32
-                sourceSize: Qt.size(32, 32)
-                opacity: 0.15
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    colorization: 1.0
-                    colorizationColor: Theme.muted
-                    brightness: 1.0
-                }
-            }
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: 12
 
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                text: "No tracks yet"
-                color: Theme.muted
-                font.pixelSize: 11
+                Image {
+                    Layout.alignment: Qt.AlignHCenter
+                    source: "qrc:/icons/outline/adjustments.svg"
+                    width: 32
+                    height: 32
+                    sourceSize: Qt.size(32, 32)
+                    opacity: 0.15
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        colorization: 1.0
+                        colorizationColor: Theme.muted
+                        brightness: 1.0
+                    }
+                }
+
+                Text {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "No tracks yet"
+                    color: Theme.muted
+                    font.pixelSize: 11
+                }
             }
         }
     }

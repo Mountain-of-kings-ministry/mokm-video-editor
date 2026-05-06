@@ -13,7 +13,11 @@ Rectangle {
 
     property int panelType: DockManager.preview
     property bool isFloating: false
-    property var contentItem: null
+    property alias contentArea: contentAreaItem
+
+    signal closeRequested()
+    signal floatRequested()
+    signal typeChanged()
 
     readonly property var panelNames: ["Preview", "Media Bin", "Properties", "Node Editor", "Timeline"]
     readonly property var panelIcons: [
@@ -24,12 +28,38 @@ Rectangle {
         "qrc:/icons/outline/list.svg"
     ]
 
-    signal closeRequested(var panel)
-    signal floatRequested(var panel)
-    signal splitRequested(var panel, string direction)
-    signal typeChanged(var panel, int newType)
+    readonly property var panelSources: [
+        "qrc:/qt/qml/mokm_video_editor/src/pages/components/panels/PreviewPanel.qml",
+        "qrc:/qt/qml/mokm_video_editor/src/pages/components/panels/MiniBin.qml",
+        "qrc:/qt/qml/mokm_video_editor/src/pages/components/panels/PropertiesPanel.qml",
+        "qrc:/qt/qml/mokm_video_editor/src/pages/components/panels/NodePanel.qml",
+        "qrc:/qt/qml/mokm_video_editor/src/pages/components/panels/TimelinePanel.qml"
+    ]
 
-    // Header bar
+    function init() {
+        while (contentAreaItem.children.length > 0) {
+            contentAreaItem.children[0].destroy()
+        }
+
+        var source = panelSources[panelType]
+        if (!source) return
+
+        var comp = Qt.createComponent(source)
+        if (comp.status === Component.Ready) {
+            comp.createObject(contentAreaItem, {
+                "anchors.fill": contentAreaItem
+            })
+        } else {
+            console.error("Failed to load panel:", comp.errorString())
+        }
+    }
+
+    function changeType(newType) {
+        panelType = newType
+        init()
+    }
+
+    // Header bar - anchored to top
     Rectangle {
         id: header
         anchors.top: parent.top
@@ -44,7 +74,6 @@ Rectangle {
             anchors.rightMargin: 4
             spacing: 4
 
-            // Panel type indicator/icon
             MouseArea {
                 id: typeButton
                 Layout.preferredWidth: typeIcon.width + 8
@@ -63,7 +92,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 4
                     anchors.verticalCenter: parent.verticalCenter
-                    source: root.panelIcons[root.panelType]
+                    source: root.panelIcons[panelType]
                     width: 14
                     height: 14
                     sourceSize: Qt.size(14, 14)
@@ -79,7 +108,7 @@ Rectangle {
                     anchors.left: typeIcon.right
                     anchors.leftMargin: 4
                     anchors.verticalCenter: parent.verticalCenter
-                    text: root.panelNames[root.panelType]
+                    text: root.panelNames[panelType]
                     color: Theme.foreground
                     font.pixelSize: 10
                     font.weight: Font.Medium
@@ -97,10 +126,7 @@ Rectangle {
 
                         MenuItem {
                             text: root.panelNames[index]
-                            onTriggered: {
-                                root.typeChanged(root, index)
-                                root.panelType = index
-                            }
+                            onTriggered: root.changeType(index)
                         }
                     }
                 }
@@ -108,7 +134,6 @@ Rectangle {
 
             Item { Layout.fillWidth: true }
 
-            // Float button
             Rectangle {
                 width: 20
                 height: 20
@@ -135,7 +160,7 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.floatRequested(root)
+                    onClicked: root.floatRequested()
                     onEntered: parent.color = Theme.secondaryHover
                     onExited: parent.color = "transparent"
                 }
@@ -144,7 +169,6 @@ Rectangle {
                 ToolTip.text: "Float window"
             }
 
-            // Close button
             Rectangle {
                 width: 20
                 height: 20
@@ -170,7 +194,7 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.closeRequested(root)
+                    onClicked: root.closeRequested()
                     onEntered: parent.color = Qt.rgba(0.8, 0.2, 0.2, 0.3)
                     onExited: parent.color = "transparent"
                 }
@@ -181,37 +205,13 @@ Rectangle {
         }
     }
 
-    // Content area
+    // Content area - fills remaining space below header
     Item {
-        id: contentArea
+        id: contentAreaItem
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         clip: true
-    }
-
-    // Corner drag handle for splitting
-    MouseArea {
-        id: cornerHandle
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        width: 16
-        height: 16
-        hoverEnabled: true
-        cursorShape: cornerHandle.containsMouse ? Qt.SizeFDiagCursor : Qt.ArrowCursor
-        visible: !root.isFloating
-
-        Rectangle {
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            width: 8
-            height: 8
-            radius: 1
-            color: cornerHandle.containsMouse ? Theme.primary : "transparent"
-            opacity: 0.5
-        }
-
-        onClicked: root.splitRequested(root, "right")
     }
 }

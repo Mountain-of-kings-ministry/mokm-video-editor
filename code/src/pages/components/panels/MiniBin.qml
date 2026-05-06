@@ -464,7 +464,8 @@ Rectangle {
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
                             cursorShape: Qt.PointingHandCursor
-                            drag.threshold: 0
+                            drag.axis: Drag.XAndYAxis
+                            drag.threshold: 16
 
                             onClicked: (mouse) => {
                                 if (mouse.button === Qt.LeftButton) {
@@ -477,14 +478,6 @@ Rectangle {
                                     contextMenu.fileType = model.fileType
                                     contextMenu.popup()
                                 }
-                            }
-
-                            onPressAndHold: {
-                                fileMouse.drag.active = true
-                            }
-
-                            onReleased: {
-                                fileMouse.drag.active = false
                             }
 
                             onEntered: {
@@ -573,7 +566,8 @@ Rectangle {
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
                             cursorShape: Qt.PointingHandCursor
-                            drag.threshold: 0
+                            drag.axis: Drag.XAndYAxis
+                            drag.threshold: 16
 
                             onClicked: (mouse) => {
                                 if (mouse.button === Qt.LeftButton) {
@@ -587,9 +581,6 @@ Rectangle {
                                     contextMenu.popup()
                                 }
                             }
-
-                            onPressAndHold: listMouse.drag.active = true
-                            onReleased: listMouse.drag.active = false
 
                             onEntered: {
                                 if (root.selectedFileIndex !== index)
