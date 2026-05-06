@@ -2,43 +2,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Effects
-import QtMultimedia
 
 Item {
     id: root
 
-    AudioOutput { id: previewAudioOutput }
-
-    MediaPlayer {
-        id: previewMediaPlayer
-        audioOutput: previewAudioOutput
-        videoOutput: previewVideoOut
-        source: playbackEngine.currentSource
-        autoPlay: false
-    }
-
-    Connections {
-        target: timelinePlayer
-        function onStateChanged() {
-            if (timelinePlayer.isPlaying) {
-                if (previewMediaPlayer.source !== "")
-                    previewMediaPlayer.play()
-            } else {
-                previewMediaPlayer.pause()
-            }
-        }
-    }
-
-    Connections {
-        target: playbackEngine
-        function onCurrentSourceChanged() {
-            if (previewMediaPlayer.source !== "" && timelinePlayer.isPlaying) {
-                previewMediaPlayer.play()
-            }
-        }
-    }
-
-    // Preview viewport
     Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
@@ -49,9 +16,10 @@ Item {
         border.color: Theme.border
         clip: true
 
-        VideoOutput {
-            id: previewVideoOut
+        FrameView {
+            id: previewImage
             anchors.fill: parent
+            frame: compositionEngine.currentFrame
         }
 
         Image {
@@ -93,7 +61,6 @@ Item {
         }
     }
 
-    // Playback controls bar
     Rectangle {
         id: controlsBar
         anchors.bottom: parent.bottom

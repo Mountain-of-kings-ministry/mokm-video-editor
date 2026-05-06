@@ -69,7 +69,7 @@ The adoption of a node-based system represents a significant departure from the 
 ### Level 1: Basic Editing and Fundamentals (The Core Tier)
 - **Multi-Track Non-Linear Timeline:** Qt Quick with custom C++ TimelineModel.
 - **Frame-Accurate Cutting and Trimming:** FFmpeg's `av_seek_frame`.
-- **Media Asset Management:** Qt Model/View with SQLite.
+- **Media Asset Management:** Qt Model/View with SQLite. (done)
 - **Standard Transitions:** GLSL shaders for real-time alpha blending.
 
 ### Level 2: Intermediate Editing and Effects (The Creator Tier)
@@ -113,15 +113,15 @@ The software is heavily extensible, supporting:
 
 ## 📅 Implementation Strategy and Engineering Timeline
 
-- **Phase 1: The Core Multimedia Engine (Months 1-4)**
+- **Phase 1: The Core Multimedia Engine**
   - Establish C++/CMake environment. Implement FFmpeg decoding and basic Qt Quick UI.
-- **Phase 2: The Proxy and Asset System (Months 5-8)**
+- **Phase 2: The Proxy and Asset System**
   - Implement background proxy transcoding and asset management database.
-- **Phase 3: The Timeline and Basic NLE Tools (Months 9-12)**
+- **Phase 3: The Timeline and Basic NLE Tools**
   - Build multi-track timeline and basic editing tools.
-- **Phase 4: The Node-Based Compositing Engine (Months 13-18)**
+- **Phase 4: The Node-Based Compositing Engine8**
   - Integrate node-graph library and GLSL shader framework.
-- **Phase 5: Plugins and Professional Refinement (Months 19-24)**
+- **Phase 5: Plugins and Professional Refinement4**
   - Implement OpenFX (OFX) and VST3/LV2 hosts. Integrate OCIO and OTIO.
 
 ---

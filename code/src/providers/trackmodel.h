@@ -5,7 +5,7 @@
 #include <QColor>
 #include <QString>
 
-class QMediaPlayer;
+class FFmpegProbe;
 
 struct ClipEntry {
     QString filePath;
@@ -64,7 +64,7 @@ public:
     Q_INVOKABLE int getClipDurationFrames(int trackIndex, int clipIndex) const;
     Q_INVOKABLE int getTrackEndFrame(int trackIndex) const;
     Q_INVOKABLE void importMedia(const QString &filePath, int trackIndex);
-    Q_INVOKABLE void importMediaWithDuration(const QString &filePath, int trackIndex, int durationMs);
+    Q_INVOKABLE void importMediaWithDuration(const QString &filePath, int trackIndex, int durationFrames);
 
 public slots:
     void addTrack(const QString &name, const QString &type);
@@ -78,6 +78,7 @@ public slots:
     QString getTrackTypeAt(int index) const;
     void clearTracks();
     void setClipDuration(const QString &filePath, int durationFrames);
+    void updateClipDuration(const QString &filePath, int durationFrames);
 
 signals:
     void trackCountChanged();
@@ -86,25 +87,19 @@ signals:
     void totalDurationFramesChanged();
     void clipsChanged(int trackIndex);
     void fpsChanged();
-    void durationProbed(const QString &filePath, int durationFrames);
-
-private slots:
-    void onDurationReady(qint64 duration);
 
 private:
     QString autoGenerateTrackName(const QString &type) const;
     QColor defaultTrackColor(const QString &type, int index) const;
     void recalculateTotalDuration();
-    int msToFrames(int ms) const;
+    int msToFrames(double ms) const;
 
     QList<TrackEntry> m_tracks;
     int m_videoTrackCount;
     int m_audioTrackCount;
     int m_totalDurationFrames;
     double m_fps;
-    QMediaPlayer *m_probePlayer;
-    QString m_probeFilePath;
-    int m_probeTrackIndex;
+    FFmpegProbe *m_probe;
 };
 
 #endif

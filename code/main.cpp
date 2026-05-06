@@ -7,7 +7,8 @@
 #include "trackmodel.h"
 #include "foldermodel.h"
 #include "timelineplayer.h"
-#include "timelineplaybackengine.h"
+#include "ffmpegcompositionengine.h"
+#include "frameview.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     qmlRegisterType<someClass>("kingClass", 1, 0, "SomeClass");
+    qmlRegisterType<FrameView>("mokm_video_editor", 1, 0, "FrameView");
 
     QQmlApplicationEngine engine;
 
@@ -24,16 +26,23 @@ int main(int argc, char *argv[])
     TrackModel trackModel;
     FolderModel folderModel;
     TimelinePlayer timelinePlayer;
-    TimelinePlaybackEngine playbackEngine;
+    FFmpegCompositionEngine compositionEngine;
 
     engine.rootContext()->setContextProperty("mediaFileModel", &mediaFileModel);
     engine.rootContext()->setContextProperty("trackModel", &trackModel);
     engine.rootContext()->setContextProperty("folderModel", &folderModel);
     engine.rootContext()->setContextProperty("timelinePlayer", &timelinePlayer);
-    engine.rootContext()->setContextProperty("playbackEngine", &playbackEngine);
+    engine.rootContext()->setContextProperty("compositionEngine", &compositionEngine);
 
-    playbackEngine.setTrackModel(&trackModel);
-    playbackEngine.setTimelinePlayer(&timelinePlayer);
+    compositionEngine.setTrackModel(&trackModel);
+    compositionEngine.setTimelinePlayer(&timelinePlayer);
+
+    QObject::connect(
+        &trackModel, &TrackModel::totalDurationFramesChanged,
+        &timelinePlayer, [&timelinePlayer, &trackModel]() {
+            timelinePlayer.setDuration(trackModel.totalDurationFrames());
+        }
+    );
 
     QObject::connect(
         &engine,

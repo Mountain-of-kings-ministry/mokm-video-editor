@@ -1,7 +1,7 @@
 #include "trackmodel.h"
+#include "ffmpegprobe.h"
 #include <QColor>
 #include <QFileInfo>
-#include <QMediaPlayer>
 
 static const QStringList VIDEO_EXTENSIONS = {"mp4", "avi", "mkv", "mov", "wmv", "flv", "webm", "m4v", "mpg", "mpeg"};
 static const QStringList AUDIO_EXTENSIONS = {"mp3", "wav", "aac", "flac", "ogg", "wma", "m4a", "aiff"};
@@ -13,21 +13,18 @@ TrackModel::TrackModel(QObject *parent)
       m_audioTrackCount(0),
       m_totalDurationFrames(0),
       m_fps(24.0),
-      m_probePlayer(new QMediaPlayer(this)),
-      m_probeTrackIndex(-1)
+      m_probe(new FFmpegProbe(this))
 {
-    connect(m_probePlayer, &QMediaPlayer::durationChanged, this, &TrackModel::onDurationReady);
-
     addVideoTrack();
     addVideoTrack();
     addAudioTrack();
     addAudioTrack();
 }
 
-int TrackModel::msToFrames(int ms) const
+int TrackModel::msToFrames(double ms) const
 {
     if (m_fps <= 0) return 120;
-    return static_cast<int>((static_cast<double>(ms) / 1000.0) * m_fps);
+    return static_cast<int>((ms / 1000.0) * m_fps);
 }
 
 double TrackModel::fps() const
@@ -39,36 +36,6 @@ void TrackModel::setFps(double fps)
 {
     m_fps = fps > 0 ? fps : 24.0;
     emit fpsChanged();
-}
-
-void TrackModel::onDurationReady(qint64 duration)
-{
-    if (duration <= 0 || m_probeFilePath.isEmpty())
-        return;
-
-    int durationFrames = msToFrames(static_cast<int>(duration));
-    if (durationFrames <= 0)
-        durationFrames = 120;
-
-    m_probePlayer->stop();
-
-    for (int i = 0; i < m_tracks.size(); i++) {
-        for (int j = 0; j < m_tracks[i].clips.size(); j++) {
-            if (m_tracks[i].clips[j].filePath == m_probeFilePath) {
-                m_tracks[i].clips[j].durationFrames = durationFrames;
-                QModelIndex modelIndex = this->index(i);
-                emit dataChanged(modelIndex, modelIndex, {TrackTotalDurationRole});
-                emit clipsChanged(i);
-                recalculateTotalDuration();
-                break;
-            }
-        }
-    }
-
-    emit durationProbed(m_probeFilePath, durationFrames);
-
-    m_probeFilePath.clear();
-    m_probeTrackIndex = -1;
 }
 
 int TrackModel::rowCount(const QModelIndex &parent) const
@@ -255,16 +222,23 @@ void TrackModel::importMedia(const QString &filePath, int trackIndex)
 
     int startFrame = getTrackEndFrame(trackIndex);
     QString fileType = detectFileType(filePath);
-    int defaultDurationFrames = 120;
-    if (fileType == "image")
-        defaultDurationFrames = msToFrames(5000);
+    int durationFrames = 120;
+
+    if (fileType == "image") {
+        durationFrames = msToFrames(5000);
+    } else if (fileType == "video" || fileType == "audio") {
+        MediaInfo info = m_probe->probe(filePath);
+        if (info.isValid && info.duration > 0) {
+            durationFrames = msToFrames(info.duration * 1000.0);
+        }
+    }
 
     ClipEntry clip;
     clip.filePath = fileInfo.absoluteFilePath();
     clip.fileName = fileInfo.fileName();
     clip.fileType = fileType;
     clip.startFrame = startFrame;
-    clip.durationFrames = defaultDurationFrames;
+    clip.durationFrames = durationFrames;
 
     TrackEntry &track = m_tracks[trackIndex];
     track.clips.append(clip);
@@ -275,19 +249,11 @@ void TrackModel::importMedia(const QString &filePath, int trackIndex)
     emit clipsChanged(trackIndex);
 
     recalculateTotalDuration();
-
-    if (fileType == "video" || fileType == "audio") {
-        m_probeFilePath = clip.filePath;
-        m_probeTrackIndex = trackIndex;
-        m_probePlayer->setSource(QUrl::fromLocalFile(clip.filePath));
-    }
 }
 
-void TrackModel::importMediaWithDuration(const QString &filePath, int trackIndex, int durationMs)
+void TrackModel::importMediaWithDuration(const QString &filePath, int trackIndex, int durationFrames)
 {
-    int frames = msToFrames(durationMs);
-    if (frames > 0)
-        setClipDuration(filePath, frames);
+    setClipDuration(filePath, durationFrames);
 }
 
 void TrackModel::setClipDuration(const QString &filePath, int durationFrames)
@@ -304,6 +270,11 @@ void TrackModel::setClipDuration(const QString &filePath, int durationFrames)
             }
         }
     }
+}
+
+void TrackModel::updateClipDuration(const QString &filePath, int durationFrames)
+{
+    setClipDuration(filePath, durationFrames);
 }
 
 void TrackModel::recalculateTotalDuration()

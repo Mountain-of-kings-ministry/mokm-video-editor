@@ -47,6 +47,7 @@ endforeach()
 
     qt_add_qml_module(appmokm_video_editor
         URI mokm_video_editor
+        VERSION 1.0
         QML_FILES
             src/pages/Main.qml
             src/pages/Theme.qml
@@ -99,8 +100,8 @@ target_link_libraries(appmokm_video_editor
     PRIVATE Qt6::Quick
 )
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickEffects Core Multimedia)
-target_link_libraries(appmokm_video_editor PRIVATE Qt6::Quick Qt6::QuickEffects Qt6::Core Qt6::Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Quick Core Multimedia Concurrent)
+target_link_libraries(appmokm_video_editor PRIVATE Qt6::Quick Qt6::Core Qt6::Multimedia Qt6::Concurrent)
 
 if(FUNCTION_INCLUDE_DIRS)
     target_include_directories(appmokm_video_editor PRIVATE ${FUNCTION_INCLUDE_DIRS})
