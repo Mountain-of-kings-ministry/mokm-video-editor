@@ -230,20 +230,6 @@ Rectangle {
             contentHeight: trackColumn.height
             clip: true
 
-            // Drop area for media files
-            DropArea {
-                anchors.fill: parent
-                onDropped: (drop) => {
-                    if (drop.hasText) {
-                        var filePath = drop.text
-                        var targetTrack = Math.floor(trackColumn.children.length - 1)
-                        if (targetTrack >= 0) {
-                            trackModel.importMediaToTrack(filePath, targetTrack)
-                        }
-                    }
-                }
-            }
-
             Column {
                 id: trackColumn
                 width: parent.width
@@ -260,12 +246,22 @@ Rectangle {
                         trackLocked: model.trackLocked
                         trackVisible: model.trackVisible
                         mediaCount: model.trackMediaCount
+                        clipCount: model.trackMediaCount
+                        trackIndex: index
 
                         DropArea {
                             anchors.fill: parent
+                            onEntered: (drop) => {
+                                if (drop.hasText) {
+                                    parent.compatible = trackModel.isFileCompatibleWithTrack(drop.text, index)
+                                }
+                            }
+                            onExited: (drop) => {
+                                parent.compatible = true
+                            }
                             onDropped: (drop) => {
                                 if (drop.hasText) {
-                                    trackModel.importMediaToTrack(drop.text, index)
+                                    trackModel.importMedia(drop.text, index)
                                 }
                             }
                         }

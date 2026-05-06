@@ -13,7 +13,29 @@ Item {
         id: previewMediaPlayer
         audioOutput: previewAudioOutput
         videoOutput: previewVideoOut
+        source: playbackEngine.currentSource
         autoPlay: false
+    }
+
+    Connections {
+        target: timelinePlayer
+        function onStateChanged() {
+            if (timelinePlayer.isPlaying) {
+                if (previewMediaPlayer.source !== "")
+                    previewMediaPlayer.play()
+            } else {
+                previewMediaPlayer.pause()
+            }
+        }
+    }
+
+    Connections {
+        target: playbackEngine
+        function onCurrentSourceChanged() {
+            if (previewMediaPlayer.source !== "" && timelinePlayer.isPlaying) {
+                previewMediaPlayer.play()
+            }
+        }
     }
 
     // Preview viewport

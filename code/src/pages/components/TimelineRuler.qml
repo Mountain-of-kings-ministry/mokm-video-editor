@@ -4,12 +4,13 @@ import mokm_video_editor
 Rectangle {
     id: ruler
 
-    property real pixelsPerSecond: 40
-    property real durationSeconds: 120
-    property real scrollOffset: 0
-
     height: 24
     color: Theme.secondary
+
+    readonly property real pixelsPerFrame: timelinePlayer.zoomLevel / 10.0
+    readonly property real pixelsPerSecond: timelinePlayer.zoomLevel / 10.0 * timelinePlayer.fps
+    readonly property real timelineWidth: Math.max(ruler.width, trackModel.totalDurationFrames * pixelsPerFrame + headerWidth)
+    readonly property real headerWidth: 120
 
     // Bottom border
     Rectangle {
@@ -22,7 +23,7 @@ Rectangle {
     // Playhead indicator
     Rectangle {
         id: playhead
-        x: 200 - ruler.scrollOffset
+        x: ruler.headerWidth + timelinePlayer.position * ruler.pixelsPerFrame
         width: 2
         height: parent.height
         color: Theme.primary
@@ -40,15 +41,19 @@ Rectangle {
 
     Row {
         anchors.fill: parent
-        anchors.leftMargin: -ruler.scrollOffset % (ruler.pixelsPerSecond * 5)
+        anchors.leftMargin: ruler.headerWidth
         spacing: 0
         clip: true
 
         Repeater {
-            model: Math.ceil(ruler.width / (ruler.pixelsPerSecond * 5)) + 2
+            model: {
+                var secondsPerTick = 1
+                var totalSeconds = Math.ceil(trackModel.totalDurationFrames / timelinePlayer.fps)
+                return Math.ceil(ruler.width / (ruler.pixelsPerSecond * secondsPerTick)) + 2
+            }
 
             Item {
-                width: ruler.pixelsPerSecond * 5
+                width: ruler.pixelsPerSecond
                 height: ruler.height
 
                 // Major tick
@@ -67,7 +72,7 @@ Rectangle {
                     anchors.top: parent.top
                     anchors.topMargin: 2
                     text: {
-                        var sec = Math.floor((index * 5) + (ruler.scrollOffset / ruler.pixelsPerSecond))
+                        var sec = index
                         var m = Math.floor(sec / 60)
                         var s = sec % 60
                         return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
@@ -80,7 +85,7 @@ Rectangle {
                 Repeater {
                     model: 4
                     Rectangle {
-                        x: (modelData + 1) * ruler.pixelsPerSecond
+                        x: (modelData + 1) * ruler.pixelsPerSecond / 5
                         width: 1
                         height: 5
                         color: Theme.muted

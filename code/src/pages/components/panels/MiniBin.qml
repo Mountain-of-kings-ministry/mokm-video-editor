@@ -671,24 +671,36 @@ Rectangle {
 
         MenuItem {
             text: "Add to New Track"
+            visible: contextMenu.fileType === "video" || contextMenu.fileType === "audio" || contextMenu.fileType === "image"
             onTriggered: {
                 if (contextMenu.fileType === "audio") {
                     trackModel.addAudioTrack()
-                    trackModel.importMediaToTrack(contextMenu.filePath, trackModel.trackCount - 1)
+                    trackModel.importMedia(contextMenu.filePath, trackModel.trackCount - 1)
                 } else {
                     trackModel.addVideoTrack()
-                    trackModel.importMediaToTrack(contextMenu.filePath, trackModel.trackCount - 1)
+                    trackModel.importMedia(contextMenu.filePath, trackModel.trackCount - 1)
                 }
             }
         }
 
-        MenuSeparator {}
+        MenuSeparator {
+            visible: contextMenu.fileType === "video" || contextMenu.fileType === "audio" || contextMenu.fileType === "image"
+        }
 
         Repeater {
-            model: trackModel
+            model: {
+                var indices = []
+                var ft = contextMenu.fileType
+                if (ft === "image") ft = "video"
+                for (var i = 0; i < trackModel.trackCount; i++) {
+                    if (trackModel.getTrackTypeAt(i) === ft)
+                        indices.push(i)
+                }
+                return indices
+            }
             MenuItem {
-                text: trackName + " (" + trackType + ")"
-                onTriggered: trackModel.importMediaToTrack(contextMenu.filePath, index)
+                text: trackModel.getTrackNameAt(modelData) + " (" + trackModel.getTrackTypeAt(modelData) + ")"
+                onTriggered: trackModel.importMedia(contextMenu.filePath, modelData)
             }
         }
     }

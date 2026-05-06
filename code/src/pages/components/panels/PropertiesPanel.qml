@@ -41,7 +41,7 @@ Rectangle {
             model: trackModel
 
             delegate: ItemDelegate {
-                width: parent.width
+                width: ListView.view.width
                 height: 40
                 highlighted: root.selectedTrackIndex === index
 
@@ -105,7 +105,7 @@ Rectangle {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: trackModel.setTrackVisible(index, !model.trackVisible)
+                            onClicked: trackModel.toggleVisible(index)
                             onEntered: parent.color = Theme.secondaryHover
                             onExited: parent.color = "transparent"
                         }
