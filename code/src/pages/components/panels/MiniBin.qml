@@ -13,6 +13,7 @@ Rectangle {
     property int selectedFolderIndex: -1
     property int viewMode: 0
     property int fileCount: 0
+    property bool showFolders: width >= 300
 
     signal mediaDropped(string filePath, string fileType)
 
@@ -240,8 +241,15 @@ Rectangle {
 
             // Left panel - Folder tree
             Rectangle {
-                Layout.preferredWidth: 140
+                Layout.preferredWidth: root.showFolders ? 140 : 0
                 Layout.fillHeight: true
+                visible: root.showFolders
+                clip: true
+
+                Behavior on Layout.preferredWidth {
+                    NumberAnimation { duration: 150 }
+                }
+
                 color: Theme.secondary
 
                 Rectangle {

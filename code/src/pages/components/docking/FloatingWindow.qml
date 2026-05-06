@@ -17,6 +17,9 @@ Window {
 
     property int panelType: DockManager.preview
     property bool isFloating: true
+    
+    property real lastDragX: 0
+    property real lastDragY: 0
 
     readonly property var panelNames: ["Preview", "Media Bin", "Properties", "Node Editor", "Timeline"]
     readonly property var panelSources: [
@@ -28,6 +31,12 @@ Window {
     ]
 
     signal closeRequested()
+    signal dockModeStarted()
+    signal dockModeEnded()
+    signal dockRequested(string zone)
+    signal dockDragged(real screenX, real screenY)
+
+    property bool dockDragActive: false
 
     Rectangle {
         anchors.fill: parent
@@ -41,9 +50,55 @@ Window {
 
             // Header bar
             Rectangle {
+                id: headerBar
                 Layout.fillWidth: true
                 Layout.preferredHeight: 26
                 color: Theme.secondary
+
+                MouseArea {
+                    id: dockDragArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: dockDragActive ? Qt.SizeAllCursor : Qt.ArrowCursor
+
+                    property real startX: 0
+                    property real startY: 0
+                    property bool dragging: false
+
+                    onPressed: (mouse) => {
+                        startX = mouse.x
+                        startY = mouse.y
+                        dragging = false
+                    }
+
+                    onPositionChanged: (mouse) => {
+                        if (!pressed) return
+                        var dx = mouse.x - startX
+                        var dy = mouse.y - startY
+                        if (!dragging) {
+                            if (Math.sqrt(dx * dx + dy * dy) > 5) {
+                                dragging = true
+                                dockDragActive = true
+                                root.dockModeStarted()
+                            }
+                        }
+                        if (dragging) {
+                            root.x += dx
+                            root.y += dy
+                            var gPos = dockDragArea.mapToGlobal(mouse.x, mouse.y)
+                            root.lastDragX = gPos.x
+                            root.lastDragY = gPos.y
+                            root.dockDragged(gPos.x, gPos.y)
+                        }
+                    }
+
+                    onReleased: {
+                        if (dockDragActive) {
+                            dockDragActive = false
+                            root.dockModeEnded()
+                        }
+                    }
+                }
 
                 RowLayout {
                     anchors.fill: parent
@@ -51,7 +106,6 @@ Window {
                     anchors.rightMargin: 4
                     spacing: 4
 
-                    // Panel type indicator
                     MouseArea {
                         id: typeButton
                         Layout.preferredWidth: typeIcon.width + 8
@@ -115,7 +169,6 @@ Window {
 
                     Item { Layout.fillWidth: true }
 
-                    // Dock back button
                     Rectangle {
                         width: 20
                         height: 20
@@ -150,7 +203,6 @@ Window {
                         ToolTip.text: "Dock back to editor"
                     }
 
-                    // Close button
                     Rectangle {
                         width: 20
                         height: 20
@@ -184,7 +236,6 @@ Window {
                 }
             }
 
-            // Content area
             Item {
                 id: contentArea
                 Layout.fillWidth: true
@@ -212,9 +263,8 @@ Window {
 
         var comp = Qt.createComponent(source)
         if (comp.status === Component.Ready) {
-            comp.createObject(contentArea, {
-                "anchors.fill": contentArea
-            })
+            var obj = comp.createObject(contentArea)
+            if (obj) obj.anchors.fill = contentArea
         }
     }
 

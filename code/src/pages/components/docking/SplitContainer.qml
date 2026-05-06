@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 
 Item {
     id: root
@@ -8,34 +9,15 @@ Item {
     property real minimumSize: 50
     readonly property int splitterSize: 2
 
-    property Item firstItem: null
-    property Item secondItem: null
+    property alias firstSection: firstSectionItem
+    property alias secondSection: secondSectionItem
 
-    function setItems(first, second) {
-        firstItem = first
-        secondItem = second
-
-        if (horizontal) {
-            firstItem.anchors.top = root.top
-            firstItem.anchors.left = root.left
-            firstItem.anchors.bottom = root.bottom
-            firstItem.anchors.right = splitter.left
-
-            secondItem.anchors.top = root.top
-            secondItem.anchors.left = splitter.right
-            secondItem.anchors.right = root.right
-            secondItem.anchors.bottom = root.bottom
-        } else {
-            firstItem.anchors.top = root.top
-            firstItem.anchors.left = root.left
-            firstItem.anchors.right = root.right
-            firstItem.anchors.bottom = splitter.top
-
-            secondItem.anchors.top = splitter.bottom
-            secondItem.anchors.left = root.left
-            secondItem.anchors.right = root.right
-            secondItem.anchors.bottom = root.bottom
-        }
+    Item {
+        id: firstSectionItem
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.bottom: horizontal ? parent.bottom : splitter.top
+        anchors.right: horizontal ? splitter.left : parent.right
     }
 
     Rectangle {
@@ -50,25 +32,26 @@ Item {
 
         MouseArea {
             id: splitMouse
-            anchors.fill: parent
-            anchors.margins: horizontal ? -4 : 0
-            width: horizontal ? parent.width : parent.width + 8
-            height: horizontal ? parent.height + 8 : parent.height
+            anchors.centerIn: parent
+            width: horizontal ? parent.width + 8 : parent.width
+            height: horizontal ? parent.height : parent.height + 8
             hoverEnabled: true
             cursorShape: horizontal ? Qt.SplitHCursor : Qt.SplitVCursor
 
             property real startPos: 0
             property real startSplit: 0
 
-            onPressed: {
+            onPressed: (mouse) => {
                 startPos = horizontal ? mouseX : mouseY
                 startSplit = splitPosition
             }
 
-            onPositionChanged: {
+            onPositionChanged: (mouse) => {
                 if (!pressed) return
                 var currentPos = horizontal ? mouseX : mouseY
                 var totalSize = horizontal ? root.width : root.height
+                if (totalSize <= 0) return
+
                 var delta = currentPos - startPos
                 var newSplit = startSplit + (delta / totalSize)
 
@@ -77,5 +60,13 @@ Item {
                 splitPosition = newSplit
             }
         }
+    }
+
+    Item {
+        id: secondSectionItem
+        anchors.top: horizontal ? parent.top : splitter.bottom
+        anchors.left: horizontal ? splitter.right : parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
     }
 }
