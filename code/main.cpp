@@ -6,6 +6,7 @@
 #include "mediafilemodel.h"
 #include "trackmodel.h"
 #include "foldermodel.h"
+#include "timelineplayer.h"
 
 int main(int argc, char *argv[])
 {
@@ -21,10 +22,12 @@ int main(int argc, char *argv[])
     MediaFileModel mediaFileModel;
     TrackModel trackModel;
     FolderModel folderModel;
+    TimelinePlayer timelinePlayer;
 
     engine.rootContext()->setContextProperty("mediaFileModel", &mediaFileModel);
     engine.rootContext()->setContextProperty("trackModel", &trackModel);
     engine.rootContext()->setContextProperty("folderModel", &folderModel);
+    engine.rootContext()->setContextProperty("timelinePlayer", &timelinePlayer);
 
     QObject::connect(
         &engine,

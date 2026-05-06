@@ -11,13 +11,7 @@ Item {
     property int selectedFileIndex: -1
     property int selectedFolderIndex: -1
     property int viewMode: 0
-
-    function updateViewModeGridBtnColor() {
-        return gridMouse.containsMouse ? Theme.secondaryHover : (mediaBinPage.viewMode === 0 ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent");
-    }
-    function updateViewModeListBtnColor() {
-        return listMouse.containsMouse ? Theme.secondaryHover : (mediaBinPage.viewMode === 1 ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent");
-    }
+    property int fileCount: 0
 
     Component.onCompleted: {
         folderModel.addSystemMediaFolders();
@@ -116,7 +110,6 @@ Item {
                     spacing: 4
 
                     Text {
-                        id: filterLabel
                         text: extensionMenu.currentText
                         color: Theme.foreground
                         font.pixelSize: 11
@@ -473,9 +466,12 @@ Item {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
+                                        onClicked: (mouse) => {
+                                            mouse.accepted = true;
                                             folderContextMenu.folderIndex = index;
                                             folderContextMenu.folderPath = model.folderPath;
+                                            folderContextMenu.folderName = model.folderName;
+                                            folderContextMenu.isSuperFolder = model.isSuperFolder;
                                             folderContextMenu.popup();
                                         }
                                         onEntered: folderDotBtn.color = Theme.secondaryHover
@@ -489,7 +485,9 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
+                                propagateComposedEvents: true
+                                onClicked: (mouse) => {
+                                    mouse.accepted = false;
                                     mediaBinPage.selectedFileIndex = -1;
                                     mediaBinPage.selectedFolderIndex = index;
                                     if (model.isSuperFolder) {
@@ -555,6 +553,10 @@ Item {
                         visible: mediaBinPage.viewMode === 0
 
                         model: mediaFileModel
+
+                        onCountChanged: {
+                            mediaBinPage.fileCount = mediaFileModel.rowCount();
+                        }
 
                         delegate: Rectangle {
                             id: gridFileCard
@@ -629,33 +631,27 @@ Item {
                                 id: gridFileMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    mediaBinPage.selectedFileIndex = index;
-                                    previewPanel.fileName = model.fileName;
-                                    previewPanel.filePath = model.filePath;
-                                    previewPanel.fileType = model.fileType;
-                                    previewPanel.fileSize = model.fileSize;
-                                    previewPanel.duration = model.duration;
-                                    previewPanel.resolution = model.resolution;
-                                }
 
-                                onPressed: (mouse) => {
-                                    mediaBinPage.selectedFileIndex = index;
-                                    previewPanel.fileName = model.fileName;
-                                    previewPanel.filePath = model.filePath;
-                                    previewPanel.fileType = model.fileType;
-                                    previewPanel.fileSize = model.fileSize;
-                                    previewPanel.duration = model.duration;
-                                    previewPanel.resolution = model.resolution;
-
-                                    if (mouse.button === Qt.RightButton) {
+                                onClicked: (mouse) => {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        mediaBinPage.selectedFileIndex = index;
+                                        previewPanel.fileName = model.fileName;
+                                        previewPanel.filePath = model.filePath;
+                                        previewPanel.fileType = model.fileType;
+                                        previewPanel.fileSize = model.fileSize;
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        mediaBinPage.selectedFileIndex = index;
+                                        previewPanel.fileName = model.fileName;
+                                        previewPanel.filePath = model.filePath;
+                                        previewPanel.fileType = model.fileType;
+                                        previewPanel.fileSize = model.fileSize;
                                         contextMenu.fileIndex = index;
                                         contextMenu.filePath = model.filePath;
                                         contextMenu.fileName = model.fileName;
                                         contextMenu.fileType = model.fileType;
                                         contextMenu.popup();
-                                        mouse.accepted = true;
                                     }
                                 }
 
@@ -743,26 +739,23 @@ Item {
                                 id: listFileMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    mediaBinPage.selectedFileIndex = index;
-                                    previewPanel.fileName = model.fileName;
-                                    previewPanel.filePath = model.filePath;
-                                    previewPanel.fileType = model.fileType;
-                                    previewPanel.fileSize = model.fileSize;
-                                    previewPanel.duration = model.duration;
-                                    previewPanel.resolution = model.resolution;
-                                }
 
-                                onPressed: (mouse) => {
-                                    if (mouse.button === Qt.RightButton) {
+                                onClicked: (mouse) => {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        mediaBinPage.selectedFileIndex = index;
+                                        previewPanel.fileName = model.fileName;
+                                        previewPanel.filePath = model.filePath;
+                                        previewPanel.fileType = model.fileType;
+                                        previewPanel.fileSize = model.fileSize;
+                                    } else if (mouse.button === Qt.RightButton) {
                                         mediaBinPage.selectedFileIndex = index;
                                         contextMenu.fileIndex = index;
                                         contextMenu.filePath = model.filePath;
                                         contextMenu.fileName = model.fileName;
                                         contextMenu.fileType = model.fileType;
                                         contextMenu.popup();
-                                        mouse.accepted = true;
                                     }
                                 }
 
@@ -783,11 +776,11 @@ Item {
                     }
                 }
 
-                // Empty state overlay (outside ColumnLayout)
+                // Empty state overlay
                 ColumnLayout {
                     anchors.centerIn: parent
                     spacing: 16
-                    visible: mediaFileModel.rowCount() === 0
+                    visible: mediaBinPage.fileCount === 0
 
                     Image {
                         Layout.alignment: Qt.AlignHCenter
@@ -847,6 +840,10 @@ Item {
         ]
         onAccepted: {
             mediaFileModel.addFiles([selectedFile.toString().replace("file://", "")]);
+            if (mediaBinPage.selectedFolderIndex >= 0) {
+                mediaFileModel.setFilterText("");
+                mediaFileModel.setFilterType("all");
+            }
         }
     }
 
@@ -917,17 +914,24 @@ Item {
 
         property int folderIndex: -1
         property string folderPath: ""
+        property string folderName: ""
+        property bool isSuperFolder: false
 
         MenuItem {
             text: "Browse"
             onTriggered: {
                 mediaBinPage.selectedFileIndex = -1;
                 mediaBinPage.selectedFolderIndex = folderContextMenu.folderIndex;
-                mediaFileModel.browseDirectory(folderModel.getFolderUrlAt(folderContextMenu.folderIndex));
+                if (folderContextMenu.isSuperFolder) {
+                    mediaFileModel.browseDirectories(folderModel.getChildPathsAt(folderContextMenu.folderIndex));
+                } else {
+                    mediaFileModel.browseDirectory(folderModel.getFolderUrlAt(folderContextMenu.folderIndex));
+                }
             }
         }
 
         MenuItem {
+            visible: !folderContextMenu.isSuperFolder
             text: "Remove"
             onTriggered: {
                 folderModel.removeFolder(folderContextMenu.folderIndex);

@@ -1,0 +1,1 @@
+set_source_files_properties(docking/DockManager.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)

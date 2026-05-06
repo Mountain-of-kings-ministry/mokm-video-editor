@@ -43,32 +43,44 @@ foreach(dir ${PROVIDER_SUBDIRS})
     endif()
 endforeach()
 
-qt_add_qml_module(appmokm_video_editor
-    URI mokm_video_editor
-    QML_FILES
-        src/pages/Main.qml
-        src/pages/Theme.qml
-        src/pages/SplashScreen.qml
-        src/pages/MediaBinPage.qml
-        src/pages/EditorPage.qml
-        src/pages/NodeEditorPage.qml
-        src/pages/AudioPage.qml
-        src/pages/CompositorPage.qml
-        src/pages/HistoryPage.qml
-        src/pages/RendererPage.qml
-        src/pages/SettingsPage.qml
-        src/pages/components/SidebarButton.qml
-        src/pages/components/Sidebar.qml
-        src/pages/components/EditorToolBar.qml
-        src/pages/components/PanelHeader.qml
-        src/pages/components/StatusBar.qml
-        src/pages/components/TimelineRuler.qml
-        src/pages/components/TimelineTrack.qml
-        src/pages/components/NodeSocket.qml
-        src/pages/components/MediaPreviewPanel.qml
-    SOURCES ${FUNCTION_SOURCES} ${PROVIDER_SOURCES}
-    RESOURCES src/resources/resources.qrc
-)
+    set_source_files_properties(src/pages/components/docking/DockManager.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
+    qt_add_qml_module(appmokm_video_editor
+        URI mokm_video_editor
+        QML_FILES
+            src/pages/Main.qml
+            src/pages/Theme.qml
+            src/pages/SplashScreen.qml
+            src/pages/MediaBinPage.qml
+            src/pages/EditorPage.qml
+            src/pages/NodeEditorPage.qml
+            src/pages/AudioPage.qml
+            src/pages/CompositorPage.qml
+            src/pages/HistoryPage.qml
+            src/pages/RendererPage.qml
+            src/pages/SettingsPage.qml
+            src/pages/components/SidebarButton.qml
+            src/pages/components/Sidebar.qml
+            src/pages/components/EditorToolBar.qml
+            src/pages/components/PanelHeader.qml
+            src/pages/components/StatusBar.qml
+            src/pages/components/TimelineRuler.qml
+            src/pages/components/TimelineTrack.qml
+            src/pages/components/NodeSocket.qml
+            src/pages/components/MediaPreviewPanel.qml
+            src/pages/components/docking/DockManager.qml
+            src/pages/components/docking/DockPanel.qml
+            src/pages/components/docking/DockSplitter.qml
+            src/pages/components/docking/DockRoot.qml
+            src/pages/components/docking/FloatingWindow.qml
+            src/pages/components/panels/PreviewPanel.qml
+            src/pages/components/panels/MiniBin.qml
+            src/pages/components/panels/PropertiesPanel.qml
+            src/pages/components/panels/NodePanel.qml
+            src/pages/components/panels/TimelinePanel.qml
+        SOURCES ${FUNCTION_SOURCES} ${PROVIDER_SOURCES}
+        RESOURCES src/resources/resources.qrc
+    )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

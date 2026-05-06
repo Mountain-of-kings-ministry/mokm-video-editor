@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
 import QtQuick.Effects
 import QtMultimedia
 import mokm_video_editor
@@ -38,8 +39,39 @@ Rectangle {
         id: mediaPlayer
         audioOutput: audioOutput
         videoOutput: videoOut
-        source: previewPanel.filePath !== "" && previewPanel.fileType !== "image" ? "file://" + previewPanel.filePath : ""
+        source: ""
         autoPlay: false
+
+        function safeSetSource(path) {
+            if (path === "") {
+                mediaPlayer.source = "";
+                return;
+            }
+            try {
+                mediaPlayer.stop();
+                mediaPlayer.source = path;
+                mediaPlayer.position = 0;
+            } catch(e) {
+                console.log("Media error:", e);
+            }
+        }
+
+        onSourceChanged: {
+            // Reset position when source changes
+            if (mediaPlayer.source !== "")
+                mediaPlayer.position = 0;
+        }
+    }
+
+    Connections {
+        target: previewPanel
+        function onFilePathChanged() {
+            if (previewPanel.filePath !== "" && previewPanel.fileType !== "image") {
+                mediaPlayer.safeSetSource("file://" + previewPanel.filePath);
+            } else {
+                mediaPlayer.safeSetSource("");
+            }
+        }
     }
 
     ColumnLayout {
@@ -76,7 +108,7 @@ Rectangle {
                 spacing: 6
                 visible: previewPanel.fileType === "video"
 
-                // Progress bar (clickable)
+                // Progress bar
                 Rectangle {
                     id: videoSeekBar
                     Layout.fillWidth: true
@@ -130,7 +162,6 @@ Rectangle {
                     spacing: 10
 
                     Rectangle {
-                        id: vidPlayBtn
                         width: 36
                         height: 36
                         radius: 18
@@ -185,7 +216,6 @@ Rectangle {
                     }
 
                     Rectangle {
-                        id: vidVolBar
                         width: 60
                         height: 4
                         radius: 2
@@ -222,87 +252,32 @@ Rectangle {
             ColumnLayout {
                 anchors.centerIn: parent
                 anchors.margins: 24
-                spacing: 16
+                spacing: 20
                 visible: previewPanel.fileType === "audio"
 
-                // Album art / waveform area
+                // Album art area with music icon
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 120
+                    Layout.preferredHeight: 140
                     radius: 8
-                    color: Qt.rgba(1, 1, 1, 0.08)
+                    color: Qt.rgba(1, 1, 1, 0.06)
                     border.color: Theme.border
                     border.width: 1
                     clip: true
 
-                    // Static waveform visualization
-                    Row {
-                        anchors.bottom: parent.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottomMargin: 16
-                        anchors.leftMargin: 24
-                        anchors.rightMargin: 24
-                        spacing: 2
-                        height: 40
-
-                        Rectangle { width: 3; height: 12; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 18; radius: 1.5; color: Theme.primary; opacity: 0.35 }
-                        Rectangle { width: 3; height: 24; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 16; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 28; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 32; radius: 1.5; color: Theme.primary; opacity: 0.5 }
-                        Rectangle { width: 3; height: 20; radius: 1.5; color: Theme.primary; opacity: 0.35 }
-                        Rectangle { width: 3; height: 36; radius: 1.5; color: Theme.primary; opacity: 0.55 }
-                        Rectangle { width: 3; height: 28; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 40; radius: 1.5; color: Theme.primary; opacity: 0.6 }
-                        Rectangle { width: 3; height: 34; radius: 1.5; color: Theme.primary; opacity: 0.5 }
-                        Rectangle { width: 3; height: 22; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 38; radius: 1.5; color: Theme.primary; opacity: 0.55 }
-                        Rectangle { width: 3; height: 30; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 18; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 26; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 32; radius: 1.5; color: Theme.primary; opacity: 0.5 }
-                        Rectangle { width: 3; height: 20; radius: 1.5; color: Theme.primary; opacity: 0.35 }
-                        Rectangle { width: 3; height: 14; radius: 1.5; color: Theme.primary; opacity: 0.25 }
-                        Rectangle { width: 3; height: 22; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 30; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 16; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 24; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 36; radius: 1.5; color: Theme.primary; opacity: 0.55 }
-                        Rectangle { width: 3; height: 28; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 18; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 22; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 34; radius: 1.5; color: Theme.primary; opacity: 0.5 }
-                        Rectangle { width: 3; height: 26; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 20; radius: 1.5; color: Theme.primary; opacity: 0.35 }
-                        Rectangle { width: 3; height: 14; radius: 1.5; color: Theme.primary; opacity: 0.25 }
-                        Rectangle { width: 3; height: 18; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 26; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 32; radius: 1.5; color: Theme.primary; opacity: 0.5 }
-                        Rectangle { width: 3; height: 22; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 16; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 28; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 34; radius: 1.5; color: Theme.primary; opacity: 0.5 }
-                        Rectangle { width: 3; height: 20; radius: 1.5; color: Theme.primary; opacity: 0.35 }
-                        Rectangle { width: 3; height: 14; radius: 1.5; color: Theme.primary; opacity: 0.25 }
-                        Rectangle { width: 3; height: 18; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 24; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 30; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 22; radius: 1.5; color: Theme.primary; opacity: 0.4 }
-                        Rectangle { width: 3; height: 16; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 20; radius: 1.5; color: Theme.primary; opacity: 0.35 }
-                        Rectangle { width: 3; height: 28; radius: 1.5; color: Theme.primary; opacity: 0.45 }
-                        Rectangle { width: 3; height: 18; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-                        Rectangle { width: 3; height: 12; radius: 1.5; color: Theme.primary; opacity: 0.25 }
-                        Rectangle { width: 3; height: 16; radius: 1.5; color: Theme.primary; opacity: 0.3 }
-
-                        // Progress fill overlay
-                        Rectangle {
-                            width: mediaPlayer.duration > 0 ? (mediaPlayer.position / mediaPlayer.duration) * parent.width : 0
-                            height: parent.height
-                            color: Theme.primary
-                            opacity: 0.25
+                    // Large music icon
+                    Image {
+                        anchors.centerIn: parent
+                        source: "qrc:/icons/outline/music.svg"
+                        width: 64
+                        height: 64
+                        sourceSize: Qt.size(64, 64)
+                        opacity: 0.25
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            colorization: 1.0
+                            colorizationColor: Theme.primary
+                            brightness: 1.0
                         }
                     }
 
@@ -383,9 +358,7 @@ Rectangle {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 16
 
-                    // Back 10s
                     Rectangle {
-                        id: audioBackBtn
                         width: 36
                         height: 36
                         radius: 18
@@ -414,9 +387,7 @@ Rectangle {
                         }
                     }
 
-                    // Play/Pause
                     Rectangle {
-                        id: audioPlayBtn
                         width: 44
                         height: 44
                         radius: 22
@@ -448,9 +419,7 @@ Rectangle {
                         }
                     }
 
-                    // Forward 10s
                     Rectangle {
-                        id: audioFwdBtn
                         width: 36
                         height: 36
                         radius: 18
@@ -499,7 +468,6 @@ Rectangle {
                     }
 
                     Rectangle {
-                        id: audioVolBar
                         width: 80
                         height: 4
                         radius: 2
@@ -615,54 +583,6 @@ Rectangle {
 
                     Text {
                         text: "Size: " + previewPanel.fileSize
-                        color: Theme.mutedForeground
-                        font.pixelSize: 10
-                    }
-                }
-
-                RowLayout {
-                    spacing: 8
-                    visible: previewPanel.duration !== ""
-
-                    Image {
-                        source: "qrc:/icons/outline/clock.svg"
-                        width: 14
-                        height: 14
-                        sourceSize: Qt.size(14, 14)
-                        layer.enabled: true
-                        layer.effect: MultiEffect {
-                            colorization: 1.0
-                            colorizationColor: Theme.mutedForeground
-                            brightness: 1.0
-                        }
-                    }
-
-                    Text {
-                        text: "Duration: " + previewPanel.duration
-                        color: Theme.mutedForeground
-                        font.pixelSize: 10
-                    }
-                }
-
-                RowLayout {
-                    spacing: 8
-                    visible: previewPanel.resolution !== ""
-
-                    Image {
-                        source: "qrc:/icons/outline/resize.svg"
-                        width: 14
-                        height: 14
-                        sourceSize: Qt.size(14, 14)
-                        layer.enabled: true
-                        layer.effect: MultiEffect {
-                            colorization: 1.0
-                            colorizationColor: Theme.mutedForeground
-                            brightness: 1.0
-                        }
-                    }
-
-                    Text {
-                        text: "Resolution: " + previewPanel.resolution
                         color: Theme.mutedForeground
                         font.pixelSize: 10
                     }
